@@ -1,0 +1,261 @@
+{
+  "Nav": {
+    "home": "Home",
+    "apply": "Apply for Subsidy",
+    "admin": "Admin Login"
+  },
+
+  "Login": {
+    "loginTitle": "Login",
+    "subtitle": "Enter your credentials to continue",
+    "username": "Username",
+    "password": "Password",
+    "loginButton": "Login",
+    "loggingIn": "Logging in...",
+    "loginFailed": "Login failed",
+    "invalidCredentials": "Invalid credentials for",
+    "errorOccurred": "An error occurred. Please try again.",
+    "backToSelection": "Back to role selection"
+  },
+
+  "Landing": {
+    "brand": "निश्चित",
+    "home": "Home",
+    "apply": "Apply for Subsidy",
+    "about": "About",
+    "titleLine1": "Empowering Subsidy Distribution",
+    "titleLine2": "with Blockchain Transparency",
+    "cta": "Apply for Subsidy",
+    "toggleTo": "नेपाली"
+  },
+ "Apply": {
+  "steps": {
+    "general": "General Details",
+    "kyc": "KYC Details",
+    "scheme": "Subsidy Scheme",
+    "upload": "Upload Document",
+    "agreement": "User Agreement",
+    "completed": "Completed"
+  },
+  "title": "General Details",
+
+  "firstName": "First Name",
+  "middleName": "Middle Name",
+  "lastName": "Last Name",
+
+  "firstNamePlaceholder": "First Name",
+  "middleNamePlaceholder": "Middle Name",
+  "lastNamePlaceholder": "Last Name",
+
+  "dob": "Date of Birth",
+  "dobPlaceholder": "YYYY-MM-DD (BS)",
+
+  "gender": "Gender",
+  "genderSelect": "Select Gender",
+  "genderFemale": "Female",
+  "genderMale": "Male",
+  "genderOther": "Others",
+
+  "phone": "Phone Number",
+  "phonePlaceholder": "Phone Number",
+
+  "submit": "Submit"
+  },
+"Kyc": {
+  "title": "KYC Details",
+  "steps": {
+    "general": "General Details",
+    "kyc": "KYC Details",
+    "scheme": "Subsidy Scheme",
+    "upload": "Upload Document",
+    "agreement": "User Agreement",
+    "completed": "Completed"
+  },
+  "documentType": "Document Type",
+  "docCitizenship": "Citizenship",
+  "docPassport": "Passport",
+  "idNumber": "Document Number",
+  "idNumberPlaceholder": "Enter document number",
+  "issuedDistrict": "Issued District",
+  "issuedDistrictPlaceholder": "Enter issued district",
+  "issuedDate": "Issued Date",
+  "issuedDatePlaceholder": "YYYY-MM-DD (BS)",
+  "back": "Back",
+  "next": "Next"
+},
+"Scheme": {
+  "title": "Subsidy Scheme",
+  "steps": {
+    "general": "General Details",
+    "kyc": "KYC Details",
+    "scheme": "Subsidy Scheme",
+    "upload": "Upload Document",
+    "agreement": "User Agreement",
+    "completed": "Completed"
+  },
+  "schemeType": "Scheme Type",
+  "schemeTypeSelect": "Select a scheme",
+  "schemeSeed": "Seed Subsidy",
+  "schemeFertilizer": "Fertilizer Subsidy",
+  "schemeEquipment": "Equipment Subsidy",
+  "schemeIrrigation": "Irrigation Subsidy",
+
+  "farmingType": "Farming Type",
+  "farmingTypeSelect": "Select farming type",
+  "farmingCrop": "Crop Farming",
+  "farmingLivestock": "Livestock",
+  "farmingMixed": "Mixed",
+
+  "landOwnership": "Land Ownership",
+  "landOwnershipSelect": "Select land ownership",
+  "landOwner": "Owner",
+  "landTenant": "Tenant",
+  "landLease": "Lease",
+
+  "requestedAmount": "Requested Amount",
+  "requestedAmountPlaceholder": "Enter amount",
+  "notes": "Additional Notes",
+  "notesPlaceholder": "Write any additional details (optional)",
+
+  "back": "Back",
+  "next": "Next"
+},
+"Upload": {
+  "title": "Upload Document",
+  "description": "Upload clear photos or PDFs of the required documents.",
+  "steps": {
+    "general": "General Details",
+    "kyc": "KYC Details",
+    "scheme": "Subsidy Scheme",
+    "upload": "Upload Document",
+    "agreement": "User Agreement",
+    "completed": "Completed"
+  },
+  "citizenshipFront": "Citizenship (Front)",
+  "citizenshipBack": "Citizenship (Back)",
+  "landOwnership": "Land Ownership Document",
+  "photo": "Passport Size Photo",
+  "hintImagesPdf": "Accepted: PDF or image files",
+  "hintImagesOnly": "Accepted: image files only",
+  "back": "Back",
+  "next": "Next"
+},
+"Agreement": {
+  "title": "User Agreement",
+  "subtitle": "Please read and accept the terms before submitting.",
+  "steps": {
+    "general": "General Details",
+    "kyc": "KYC Details",
+    "scheme": "Subsidy Scheme",
+    "upload": "Upload Document",
+    "agreement": "User Agreement",
+    "completed": "Completed"
+  },
+  "content": {
+    "p1": "By submitting this application, you confirm that the information you provide is true and accurate to the best of your knowledge.",
+    "p2": "You understand that providing false information may result in rejection of the application and may lead to legal action under applicable rules.",
+    "p3": "You agree that the documents you upload will be used only for verification and subsidy processing purposes.",
+    "li1": "Your data will be handled securely and used only for official purposes.",
+    "li2": "You may be contacted for additional verification if required.",
+    "li3": "Approval is subject to eligibility and government policies.",
+    "p4": "If you agree to these terms, please tick the checkbox below and submit the application."
+  },
+  "acceptText": "I have read and agree to the terms and conditions.",
+  "back": "Back",
+  "submit": "Submit Application"
+},
+"Completed": {
+  "title": "Application Submitted Successfully!",
+  "description": "Your subsidy application has been submitted. You will be notified after verification.",
+  "referenceLabel": "Reference Number",
+  "referenceExample": "AHA-2025-000123",
+  "newApplication": "Start New Application",
+  "goHome": "Go to Home",
+  "steps": {
+    "general": "General Details",
+    "kyc": "KYC Details",
+    "scheme": "Subsidy Scheme",
+    "upload": "Upload Document",
+    "agreement": "User Agreement",
+    "completed": "Completed"
+  }
+},
+"SchemeV2": {
+  "steps": {
+    "general": "General Details",
+    "kyc": "KYC Details",
+    "scheme": "Subsidy Scheme",
+    "upload": "Upload Document",
+    "agreement": "User Agreement",
+    "completed": "Completed"
+  },
+  "title": "Subsidy Scheme",
+  "schemeApplyingFor": "Scheme applying for",
+  "fertilizers": "Fertilizers",
+  "seed": "Seed",
+  "equipment": "Equipment",
+  "livestock": "Livestock",
+  "previousSubsidyRecord": "Previous subsidy record",
+  "previousSubsidyPlaceholder": "Please provide details of any previous subsidies received (if any)",
+  "declarationTitle": "Declaration",
+  "declarationText": "All the information I have provided is correct",
+  "back": "Back",
+  "submit": "Submit"
+},
+"UploadV2": {
+  "steps": {
+    "general": "General Details",
+    "kyc": "KYC Details",
+    "scheme": "Subsidy Scheme",
+    "upload": "Upload Document",
+    "agreement": "User Agreement",
+    "completed": "Completed"
+  },
+  "title": "Upload Document",
+  "farmerId": "Farmer ID card",
+  "photo": "Recent pp size photo",
+  "citizenshipFront": "Citizenship (front)",
+  "citizenshipBack": "Citizenship (back)",
+  "lalpurja": "Lalpurja/Lease Document",
+  "uploaded": "Uploaded",
+  "uploadBtn": "UPLOAD",
+  "back": "Back",
+  "submit": "Submit"
+},
+"CompletedV2": {
+  "steps": {
+    "general": "General Details",
+    "kyc": "KYC Details",
+    "scheme": "Subsidy Scheme",
+    "upload": "Upload Document",
+    "agreement": "User Agreement",
+    "completed": "Completed"
+  },
+  "title": "Application Completed!",
+  "subtitle": "Subsidy has been successfully applied",
+  "description": "Your application has been submitted successfully. You will receive a confirmation and further updates regarding your subsidy application via email or phone.",
+  "summaryTitle": "Application Summary:",
+  "applicationDate": "Application Date",
+  "applicationId": "Application ID",
+  "status": "Status",
+  "statusSubmitted": "Submitted",
+  "nextStep": "Next Step",
+  "nextStepValue": "Review and Processing",
+  "backHome": "Back to Home",
+  "print": "Print Confirmation"
+}
+
+
+
+
+
+
+
+
+
+}
+
+
+
+
+
