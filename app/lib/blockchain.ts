@@ -1,5 +1,31 @@
 import { ethers } from "ethers";
 
+// Simple in-memory nonce cache to prevent nonce conflicts
+const nonceCache = new Map<string, number>();
+
+// Function to get and increment nonce for a specific address
+async function getNonce(signer: ethers.Wallet): Promise<number> {
+    const address = await signer.getAddress();
+    
+    if (!signer.provider) {
+        throw new Error("Signer provider is null");
+    }
+    
+    // Get current network nonce
+    const networkNonce = await signer.provider.getTransactionCount(address, "pending");
+    
+    // Get cached nonce (if any)
+    const cachedNonce = nonceCache.get(address) || 0;
+    
+    // Use the higher of network nonce or cached nonce
+    const nonce = Math.max(networkNonce, cachedNonce);
+    
+    // Update cache
+    nonceCache.set(address, nonce + 1);
+    
+    return nonce;
+}
+
 // 7-Stage "Scan-Upload-Verify-Release" workflow
 // 0: Created (Processor uploaded initial docs)
 // 1: VerifiedByAdmin (Admin verified Stage 0)
@@ -157,6 +183,41 @@ export function getContract(privateKey?: string) {
     }
     const signer = new ethers.Wallet(privateKey, provider);
     return new ethers.Contract(contractAddress, ABI, signer);
+}
+
+// Function to send transaction with nonce management
+export async function sendTransactionWithNonce(
+    contract: ethers.Contract, 
+    functionName: string, 
+    args: any[]
+): Promise<ethers.TransactionReceipt> {
+    const signer = contract.runner as ethers.Wallet;
+    if (!signer) {
+        throw new Error("Contract must be instantiated with a signer");
+    }
+    
+    if (!signer.provider) {
+        throw new Error("Signer provider is null");
+    }
+    
+    // Get appropriate nonce
+    const nonce = await getNonce(signer);
+    
+    // Estimate gas
+    const gasEstimate = await contract[functionName].estimateGas(...args);
+    
+    // Get gas price
+    const gasPrice = await signer.provider.getFeeData();
+    
+    // Send transaction with explicit nonce
+    const tx = await contract[functionName](...args, {
+        nonce: nonce,
+        gasLimit: gasEstimate,
+        maxFeePerGas: gasPrice.maxFeePerGas,
+        maxPriorityFeePerGas: gasPrice.maxPriorityFeePerGas
+    });
+    
+    return await tx.wait();
 }
 
 export const ADMIN_KEY = process.env.ADMIN_PRIVATE_KEY!;

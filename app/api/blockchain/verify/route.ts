@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import { getContract, ADMIN_KEY, Stage, decodeBlockchainError } from "@/app/lib/blockchain";
+import { getContract, ADMIN_KEY, Stage, decodeBlockchainError, sendTransactionWithNonce } from "@/app/lib/blockchain";
 import dbPool from "@/app/lib/db";
 
 export type Submission = {
@@ -66,8 +66,7 @@ export async function POST(request: Request) {
                 console.log("[AdminVerify] Contract address:", contract.target);
                 console.log("[AdminVerify] Creating item with:", { beneficiaryAddress, cid });
 
-                const tx = await contract.createItem(beneficiaryAddress, cid);
-                receipt = await tx.wait();
+                receipt = await sendTransactionWithNonce(contract, 'createItem', [beneficiaryAddress, cid]);
                 console.log("[AdminVerify] Item created, tx:", receipt.hash);
                 console.log("[AdminVerify] Receipt logs:", receipt.logs.length);
 
@@ -110,8 +109,7 @@ export async function POST(request: Request) {
                 }
 
                 // Now verify the newly created item
-                const verifyTx = await contract.adminVerify(resolvedItemId, currentStage);
-                receipt = await verifyTx.wait();
+                receipt = await sendTransactionWithNonce(contract, 'adminVerify', [resolvedItemId, currentStage]);
                 console.log(`[AdminVerify] Item ${resolvedItemId} verified`);
 
             } catch (error: any) {
@@ -121,8 +119,7 @@ export async function POST(request: Request) {
         } else {
             // Standard verification for existing items
             try {
-                const tx = await contract.adminVerify(resolvedItemId, currentStage);
-                receipt = await tx.wait();
+                receipt = await sendTransactionWithNonce(contract, 'adminVerify', [resolvedItemId, currentStage]);
                 console.log(`[AdminVerify] Item ${resolvedItemId} verified from Stage ${currentStage}`);
             } catch (error: any) {
                 console.error("[AdminVerify] Verification error:", error.message);

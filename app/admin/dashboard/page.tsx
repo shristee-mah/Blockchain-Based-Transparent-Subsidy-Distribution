@@ -55,7 +55,7 @@ type Submission = {
   current_stage?: number;
 };
 
-type ActiveView = "subsidy" | "verify";
+type ActiveView = "subsidy" | "verify" | "beneficiary";
 type RoleFilter = "producer" | "transporter" | "distributor";
 
 function nextActor(role: Submission["role"]) {
@@ -90,6 +90,12 @@ export default function AdminDashboardPage() {
   const [dateRange, setDateRange] = useState<"today" | "week" | "month" | "all">("all");
   const [isRealTimeConnected, setIsRealTimeConnected] = useState(false);
   const [lastRealTimeUpdate, setLastRealTimeUpdate] = useState<string | null>(null);
+  
+  // Beneficiary tracking states
+  const [beneficiaryPhone, setBeneficiaryPhone] = useState("");
+  const [beneficiaryData, setBeneficiaryData] = useState<any>(null);
+  const [beneficiaryLoading, setBeneficiaryLoading] = useState(false);
+  const [beneficiaryError, setBeneficiaryError] = useState("");
 
   // Real-time SSE connection
   useEffect(() => {
@@ -361,6 +367,41 @@ export default function AdminDashboardPage() {
     } catch (err: any) {
       console.error("[AdminVerify] Error:", err);
       showToast("⚠ " + err.message);
+    }
+  };
+
+  const handleBeneficiaryTrack = async () => {
+    if (!beneficiaryPhone.trim()) {
+      setBeneficiaryError("Please enter a phone number");
+      return;
+    }
+
+    setBeneficiaryLoading(true);
+    setBeneficiaryError("");
+    setBeneficiaryData(null);
+
+    try {
+      const response = await fetch(`/api/beneficiary/track?phone=${encodeURIComponent(beneficiaryPhone.trim())}`);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to track beneficiary');
+      }
+
+      const data = await response.json();
+      setBeneficiaryData(data);
+      
+      if (data.applications.length === 0) {
+        setBeneficiaryError("No applications found for this phone number");
+      } else {
+        showToast(`✓ Found ${data.applications.length} application(s)`);
+      }
+      
+    } catch (err: any) {
+      console.error("[Beneficiary Track] Error:", err);
+      setBeneficiaryError(err.message || "Failed to track beneficiary");
+    } finally {
+      setBeneficiaryLoading(false);
     }
   };
 
@@ -691,6 +732,18 @@ export default function AdminDashboardPage() {
                 })}
               </div>
             )}
+            <button
+              style={{
+                ...styles.navItem,
+                ...(activeView === "beneficiary" && styles.active),
+              }}
+              onClick={() => {
+                setActiveView("beneficiary");
+                setVerifyOpen(false);
+              }}
+            >
+              Subsidy Status
+            </button>
           </nav>
 
           <div style={{ marginTop: "auto" }}>
@@ -705,10 +758,14 @@ export default function AdminDashboardPage() {
             <h1 style={styles.h1}>
               {activeView === "subsidy"
                 ? "Subsidy Overview"
+                : activeView === "beneficiary"
+                ? "Subsidy Status"
                 : `${activeRoleFilter.charAt(0).toUpperCase() + activeRoleFilter.slice(1)} Verification`}
             </h1>
             <p style={styles.sub}>
-              Government subsidy document & verification console
+              {activeView === "beneficiary"
+                ? "Track subsidy application status by beneficiary phone number"
+                : "Government subsidy document & verification console"}
             </p>
           </header>
 
@@ -1131,6 +1188,294 @@ export default function AdminDashboardPage() {
                         ... and {approvedItems.length - 5} more approved applications
                       </div>
                     )}
+                  </div>
+                </div>
+              )}
+            </section>
+          )}
+
+          {activeView === "beneficiary" && (
+            <section style={styles.card}>
+              <h2 style={styles.h2}>Beneficiary Subsidy Tracking</h2>
+              
+              {/* Search Form */}
+              <div style={{
+                background: "#f8f9ff",
+                borderRadius: "12px",
+                padding: "20px",
+                marginBottom: "24px",
+                border: "1px solid #e0e7ff"
+              }}>
+                <div style={{ marginBottom: "16px" }}>
+                  <label style={{ 
+                    display: "block", 
+                    fontSize: "14px", 
+                    fontWeight: "600", 
+                    color: "#374151", 
+                    marginBottom: "8px" 
+                  }}>
+                    Enter Beneficiary Phone Number
+                  </label>
+                  <div style={{ display: "flex", gap: "12px" }}>
+                    <input
+                      type="tel"
+                      placeholder="e.g., 9876543210"
+                      value={beneficiaryPhone}
+                      onChange={(e) => setBeneficiaryPhone(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleBeneficiaryTrack()}
+                      style={{
+                        flex: 1,
+                        padding: "12px 16px",
+                        borderRadius: "8px",
+                        border: "1px solid #d1d5db",
+                        fontSize: "14px",
+                        outline: "none",
+                        transition: "border-color 0.2s"
+                      }}
+                    />
+                    <button
+                      onClick={handleBeneficiaryTrack}
+                      disabled={beneficiaryLoading}
+                      style={{
+                        padding: "12px 24px",
+                        borderRadius: "8px",
+                        border: "none",
+                        background: beneficiaryLoading ? "#9ca3af" : "#3D4B9C",
+                        color: "#fff",
+                        fontSize: "14px",
+                        fontWeight: "600",
+                        cursor: beneficiaryLoading ? "not-allowed" : "pointer",
+                        transition: "background-color 0.2s"
+                      }}
+                    >
+                      {beneficiaryLoading ? "Searching..." : "Track"}
+                    </button>
+                  </div>
+                  {beneficiaryError && (
+                    <div style={{
+                      marginTop: "8px",
+                      padding: "8px 12px",
+                      borderRadius: "6px",
+                      background: "#fee2e2",
+                      border: "1px solid #fecaca",
+                      fontSize: "13px",
+                      color: "#dc2626"
+                    }}>
+                      {beneficiaryError}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Results */}
+              {beneficiaryData && (
+                <div>
+                  {/* Summary Cards */}
+                  <div style={{ 
+                    display: "grid", 
+                    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", 
+                    gap: "16px", 
+                    marginBottom: "24px" 
+                  }}>
+                    <div style={{
+                      background: "#fff",
+                      borderRadius: "8px",
+                      padding: "16px",
+                      border: "1px solid #e5e7eb",
+                      textAlign: "center"
+                    }}>
+                      <div style={{ fontSize: "24px", fontWeight: "700", color: "#3D4B9C", marginBottom: "4px" }}>
+                        {beneficiaryData.summary.totalApplications}
+                      </div>
+                      <div style={{ fontSize: "12px", color: "#6b7280" }}>Total Applications</div>
+                    </div>
+                    <div style={{
+                      background: "#fff",
+                      borderRadius: "8px",
+                      padding: "16px",
+                      border: "1px solid #e5e7eb",
+                      textAlign: "center"
+                    }}>
+                      <div style={{ fontSize: "24px", fontWeight: "700", color: "#f59e0b", marginBottom: "4px" }}>
+                        {beneficiaryData.summary.pendingApplications}
+                      </div>
+                      <div style={{ fontSize: "12px", color: "#6b7280" }}>Pending</div>
+                    </div>
+                    <div style={{
+                      background: "#fff",
+                      borderRadius: "8px",
+                      padding: "16px",
+                      border: "1px solid #e5e7eb",
+                      textAlign: "center"
+                    }}>
+                      <div style={{ fontSize: "24px", fontWeight: "700", color: "#16a34a", marginBottom: "4px" }}>
+                        {beneficiaryData.summary.completedApplications}
+                      </div>
+                      <div style={{ fontSize: "12px", color: "#6b7280" }}>Completed</div>
+                    </div>
+                    <div style={{
+                      background: "#fff",
+                      borderRadius: "8px",
+                      padding: "16px",
+                      border: "1px solid #e5e7eb",
+                      textAlign: "center"
+                    }}>
+                      <div style={{ fontSize: "24px", fontWeight: "700", color: "#6366f1", marginBottom: "4px" }}>
+                        {beneficiaryData.summary.inProgressApplications}
+                      </div>
+                      <div style={{ fontSize: "12px", color: "#6b7280" }}>In Progress</div>
+                    </div>
+                  </div>
+
+                  {/* Beneficiary Info */}
+                  {beneficiaryData.beneficiary && (
+                    <div style={{
+                      background: "#f0fdf4",
+                      borderRadius: "8px",
+                      padding: "16px",
+                      marginBottom: "24px",
+                      border: "1px solid #bbf7d0"
+                    }}>
+                      <h3 style={{ fontSize: "16px", fontWeight: "600", color: "#166534", marginBottom: "12px" }}>
+                        Beneficiary Information
+                      </h3>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "12px" }}>
+                        <div>
+                          <span style={{ fontSize: "12px", color: "#6b7280" }}>Name:</span>
+                          <div style={{ fontSize: "14px", fontWeight: "500" }}>
+                            {beneficiaryData.beneficiary.name || 'N/A'}
+                          </div>
+                        </div>
+                        <div>
+                          <span style={{ fontSize: "12px", color: "#6b7280" }}>Phone:</span>
+                          <div style={{ fontSize: "14px", fontWeight: "500" }}>
+                            {beneficiaryData.phone}
+                          </div>
+                        </div>
+                        <div>
+                          <span style={{ fontSize: "12px", color: "#6b7280" }}>District:</span>
+                          <div style={{ fontSize: "14px", fontWeight: "500" }}>
+                            {beneficiaryData.beneficiary.district || 'N/A'}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Applications Timeline */}
+                  <div>
+                    <h3 style={{ fontSize: "18px", fontWeight: "600", color: "#374151", marginBottom: "16px" }}>
+                      Application Timeline
+                    </h3>
+                    {beneficiaryData.applications.map((app: any, index: number) => (
+                      <div key={app.applicationId} style={{
+                        background: "#fff",
+                        borderRadius: "12px",
+                        padding: "20px",
+                        marginBottom: "16px",
+                        border: "1px solid #e5e7eb",
+                        boxShadow: "0 1px 3px rgba(0,0,0,0.1)"
+                      }}>
+                        {/* Application Header */}
+                        <div style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          marginBottom: "16px",
+                          paddingBottom: "12px",
+                          borderBottom: "1px solid #f3f4f6"
+                        }}>
+                          <div>
+                            <div style={{ fontSize: "16px", fontWeight: "600", color: "#374151", marginBottom: "4px" }}>
+                              Application #{app.applicationId}
+                            </div>
+                            <div style={{ fontSize: "12px", color: "#6b7280" }}>
+                              Applied: {new Date(app.createdAt).toLocaleDateString()} • 
+                              Role: {app.role?.charAt(0).toUpperCase() + app.role?.slice(1) || 'N/A'}
+                            </div>
+                          </div>
+                          <div style={{
+                            padding: "6px 12px",
+                            borderRadius: "20px",
+                            fontSize: "12px",
+                            fontWeight: "600",
+                            background: app.isCompleted ? "#dcfce7" : 
+                                       app.isActive ? "#fef3c7" : "#fee2e2",
+                            color: app.isCompleted ? "#16a34a" : 
+                                   app.isActive ? "#f59e0b" : "#dc2626"
+                          }}>
+                            {app.stageName}
+                          </div>
+                        </div>
+
+                        {/* Progress Bar */}
+                        <div style={{ marginBottom: "16px" }}>
+                          <div style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            marginBottom: "8px"
+                          }}>
+                            <span style={{ fontSize: "12px", color: "#6b7280" }}>Progress</span>
+                            <span style={{ fontSize: "12px", fontWeight: "600", color: "#374151" }}>
+                              {app.progress}%
+                            </span>
+                          </div>
+                          <div style={{
+                            height: "8px",
+                            borderRadius: "4px",
+                            background: "#e5e7eb",
+                            overflow: "hidden"
+                          }}>
+                            <div style={{
+                              height: "100%",
+                              width: `${app.progress}%`,
+                              background: app.isCompleted ? "#16a34a" : 
+                                         app.isActive ? "#f59e0b" : "#6b7280",
+                              transition: "width 0.3s ease"
+                            }} />
+                          </div>
+                        </div>
+
+                        {/* Stage Details */}
+                        <div style={{
+                          background: "#f9fafb",
+                          borderRadius: "8px",
+                          padding: "12px",
+                          marginBottom: "12px"
+                        }}>
+                          <div style={{ fontSize: "13px", color: "#374151", marginBottom: "4px" }}>
+                            <strong>Current Stage:</strong> {app.stageName}
+                          </div>
+                          <div style={{ fontSize: "12px", color: "#6b7280", lineHeight: "1.4" }}>
+                            {app.stageDescription}
+                          </div>
+                          <div style={{ fontSize: "12px", color: "#3D4B9C", marginTop: "6px" }}>
+                            <strong>Next Steps:</strong> {app.nextSteps}
+                          </div>
+                        </div>
+
+                        {/* Additional Info */}
+                        <div style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          fontSize: "11px",
+                          color: "#6b7280"
+                        }}>
+                          <div>
+                            {app.blockchainItemId && (
+                              <span>Blockchain ID: #{app.blockchainItemId}</span>
+                            )}
+                          </div>
+                          <div>
+                            {app.approvedAt && (
+                              <span>Approved: {new Date(app.approvedAt).toLocaleDateString()}</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}

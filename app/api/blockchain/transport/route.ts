@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getContract, ADMIN_KEY, Stage } from "@/app/lib/blockchain";
+import { getContract, ADMIN_KEY, Stage, sendTransactionWithNonce } from "@/app/lib/blockchain";
 import dbPool from "@/app/lib/db";
 
 export async function POST(request: Request) {
@@ -16,8 +16,7 @@ export async function POST(request: Request) {
         let receipt;
 
         try {
-            const tx = await contract.transporterSubmit(itemId, CID);
-            receipt = await tx.wait();
+            receipt = await sendTransactionWithNonce(contract, 'transporterSubmit', [itemId, CID]);
             console.log(`[TransporterSubmit] Success: ${receipt.hash}`);
         } catch (contractError: any) {
             console.error("[TransporterSubmit] Contract error:", contractError.message);

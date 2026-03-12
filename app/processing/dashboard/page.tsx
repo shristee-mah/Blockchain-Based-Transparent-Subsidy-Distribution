@@ -412,7 +412,7 @@ export default function ProcessorDashboardPage() {
         </nav>
         <div style={{ marginTop: "auto" }}>
           <div style={styles.auditNote}>
-            NODE: #PROC-88 <br /> IPFS GATEWAY: ACTIVE
+            NODE: #PROC-88 <br /> IPFS GATEWAY: ACTIVE <br /> LAST SYNC: 2082-10-15 14:30
           </div>
           <button onClick={() => router.push("/")} style={styles.logoutBtn}>
             Logout
@@ -433,8 +433,9 @@ export default function ProcessorDashboardPage() {
         </header>
 
         <div style={styles.metricsRow}>
-          <MetricCard label="Tasks Completed" value="24" />
-          <MetricCard label="IPFS CIDs Issued" value="12" />
+          <MetricCard label="Tasks Completed" value="47" />
+          <MetricCard label="IPFS CIDs Issued" value="28" />
+          <MetricCard label="Pending Review" value="12" />
         </div>
 
         {activeView === "tasks" && (
@@ -443,14 +444,38 @@ export default function ProcessorDashboardPage() {
             <div style={styles.taskList}>
               <TaskItem
                 id="#APP-201"
-                title="Verify Seed Stock Batch #99"
+                title="Verify Seed Stock Batch #99 - Wheat Variety"
                 priority="High"
                 onClick={() => setActiveView("upload")}
               />
               <TaskItem
                 id="#APP-205"
-                title="Approve Fertilizer Stock #992"
+                title="Approve Fertilizer Stock #992 - Urea 50kg bags"
                 priority="Medium"
+                onClick={() => setActiveView("upload")}
+              />
+              <TaskItem
+                id="#APP-208"
+                title="Process Pesticide Application #145 - Organic Certification"
+                priority="High"
+                onClick={() => setActiveView("upload")}
+              />
+              <TaskItem
+                id="#APP-212"
+                title="Review Irrigation Equipment Request #78"
+                priority="Low"
+                onClick={() => setActiveView("upload")}
+              />
+              <TaskItem
+                id="#APP-215"
+                title="Validate Soil Test Results - District 3"
+                priority="Medium"
+                onClick={() => setActiveView("upload")}
+              />
+              <TaskItem
+                id="#APP-218"
+                title="Approve Greenhouse Film Subsidy #23"
+                priority="Low"
                 onClick={() => setActiveView("upload")}
               />
             </div>
@@ -687,6 +712,7 @@ export default function ProcessorDashboardPage() {
                   <th style={styles.th}>Resource</th>
                   <th style={styles.th}>Total Unit</th>
                   <th style={styles.th}>Status</th>
+                  <th style={styles.th}>Last Updated</th>
                 </tr>
               </thead>
               <tbody>
@@ -694,11 +720,49 @@ export default function ProcessorDashboardPage() {
                   name="Urea Fertilizer"
                   total="5,000kg"
                   status="Stable"
+                  lastUpdated="2082-10-14"
                 />
                 <InventoryRow
-                  name="Paddy Seeds"
+                  name="Paddy Seeds (Basmati)"
                   total="1,200kg"
                   status="Critical"
+                  lastUpdated="2082-10-13"
+                />
+                <InventoryRow
+                  name="DAP Fertilizer"
+                  total="3,500kg"
+                  status="Stable"
+                  lastUpdated="2082-10-15"
+                />
+                <InventoryRow
+                  name="Wheat Seeds (HD-2967)"
+                  total="2,800kg"
+                  status="Low"
+                  lastUpdated="2082-10-12"
+                />
+                <InventoryRow
+                  name="Potassium Sulfate"
+                  total="1,750kg"
+                  status="Stable"
+                  lastUpdated="2082-10-14"
+                />
+                <InventoryRow
+                  name="Maize Seeds (Hybrid)"
+                  total="950kg"
+                  status="Critical"
+                  lastUpdated="2082-10-11"
+                />
+                <InventoryRow
+                  name="Organic Pesticide"
+                  total="450L"
+                  status="Low"
+                  lastUpdated="2082-10-15"
+                />
+                <InventoryRow
+                  name="Lentil Seeds"
+                  total="600kg"
+                  status="Stable"
+                  lastUpdated="2082-10-13"
                 />
               </tbody>
             </table>
@@ -1076,10 +1140,12 @@ function InventoryRow({
   name,
   total,
   status,
+  lastUpdated,
 }: {
   name: string;
   total: string;
   status: string;
+  lastUpdated?: string;
 }) {
   return (
     <tr>
@@ -1089,13 +1155,14 @@ function InventoryRow({
         <span
           style={{
             ...styles.tag,
-            background: status === "Critical" ? "#fce8e6" : "#e6f4ea",
-            color: status === "Critical" ? "#d93025" : "#1e8e3e",
+            background: status === "Critical" ? "#fce8e6" : status === "Low" ? "#fff3cd" : "#e6f4ea",
+            color: status === "Critical" ? "#d93025" : status === "Low" ? "#856404" : "#1e8e3e",
           }}
         >
           {status}
         </span>
       </td>
+      <td style={styles.td}>{lastUpdated || "N/A"}</td>
     </tr>
   );
 }

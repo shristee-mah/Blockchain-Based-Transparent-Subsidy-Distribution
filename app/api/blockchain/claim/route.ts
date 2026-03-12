@@ -113,10 +113,31 @@ export async function POST(request: Request) {
             console.error('[Claim] JSON store update failed:', jsonErr.message);
         }
 
+        // ── Generate comprehensive receipt ───────────────────────────────────────
+        let receiptData: any = null;
+        try {
+            const receiptResponse = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/blockchain/receipt`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ itemId, dbId })
+            });
+            
+            if (receiptResponse.ok) {
+                const receiptResult = await receiptResponse.json();
+                receiptData = receiptResult;
+                console.log(`[Claim] Receipt generated: ${receiptResult.receiptId}`);
+            } else {
+                console.warn('[Claim] Receipt generation failed, continuing...');
+            }
+        } catch (receiptError: any) {
+            console.warn('[Claim] Receipt generation error:', receiptError.message);
+        }
+
         return NextResponse.json({
             success: true,
             message: 'Subsidy claimed successfully',
             txHash,
+            receipt: receiptData
         });
 
     } catch (error: any) {

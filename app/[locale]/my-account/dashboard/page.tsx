@@ -23,6 +23,9 @@ type Submission = {
     current_stage?: number;
     qrData?: string;
     nextStage?: string;
+    receiptId?: string;
+    receiptIpfsCid?: string;
+    claimedAt?: string;
 };
 
 type StepStatus = "done" | "active" | "pending";
@@ -232,11 +235,12 @@ export default function BeneficiaryDashboardPage() {
     const phone = searchParams.get("phone") ?? "";
     const locale = params.locale as string;
 
-    const [activeView, setActiveView] = useState<"status" | "scan">("status");
+    const [activeView, setActiveView] = useState<"status" | "scan" | "receipt">("status");
     const [submissions, setSubmissions] = useState<Submission[]>([]);
     const [blockchainLogs, setBlockchainLogs] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+    const [receiptData, setReceiptData] = useState<any>(null);
 
     const fetchBlockchainLogs = useCallback(async (itemId: number) => {
         try {
@@ -249,6 +253,22 @@ export default function BeneficiaryDashboardPage() {
             }
         } catch (e) {
             console.error("Failed to load blockchain logs", e);
+        }
+    }, []);
+
+    const fetchReceipt = useCallback(async (receiptId?: string, itemId?: number) => {
+        try {
+            const params = new URLSearchParams();
+            if (receiptId) params.append('receiptId', receiptId);
+            if (itemId) params.append('itemId', itemId.toString());
+            
+            const res = await fetch(`/api/blockchain/receipt?${params}`);
+            if (res.ok) {
+                const data = await res.json();
+                setReceiptData(data.receipt);
+            }
+        } catch (e) {
+            console.error("Failed to load receipt", e);
         }
     }, []);
 
@@ -282,6 +302,12 @@ export default function BeneficiaryDashboardPage() {
                 // For now we fetch for the most recent one to keep it simple, or we could loop
                 const latestId = Math.max(...myItemIds);
                 await fetchBlockchainLogs(latestId);
+                
+                // Fetch receipt data if available
+                const claimedSubmission = mySubmissions.find(s => s.status === 'claimed');
+                if (claimedSubmission?.receiptId || claimedSubmission?.blockchain_itemId) {
+                    await fetchReceipt(claimedSubmission.receiptId, claimedSubmission.blockchain_itemId);
+                }
             }
         } catch (e) {
             console.error("Failed to load submissions", e);
@@ -349,6 +375,14 @@ export default function BeneficiaryDashboardPage() {
                     >
                         Scan QR to Claim
                     </button>
+                    {producerSub?.status === "claimed" && (
+                        <button
+                            style={{ ...styles.navItem, ...(activeView === "receipt" && styles.active) }}
+                            onClick={() => setActiveView("receipt")}
+                        >
+                            📄 Claim Receipt
+                        </button>
+                    )}
                     <button
                         style={{ ...styles.navItem, background: "#f0fdf4", color: "#16a34a", borderColor: "#bbf7d0" }}
                         onClick={() => router.push(`/${locale}/apply`)}
@@ -370,14 +404,17 @@ export default function BeneficiaryDashboardPage() {
             <main style={styles.main}>
                 <header style={styles.header}>
                     <h1 style={styles.h1}>
-                        {activeView === "status" ? "Application Status" : "Scan QR Code"}
+                        {activeView === "status" ? "Application Status" : 
+                         activeView === "scan" ? "Scan QR Code" : "Claim Receipt"}
                     </h1>
                     <p style={styles.sub}>
                         {activeView === "status"
                             ? lastUpdated
                                 ? `Last updated: ${lastUpdated.toLocaleTimeString()}`
                                 : "Loading..."
-                            : "Scan the Distributor's QR code to claim your subsidy"}
+                            : activeView === "scan"
+                                ? "Scan the Distributor's QR code to claim your subsidy"
+                                : "Comprehensive claim receipt with transaction details and verification"}
                     </p>
                 </header>
 
@@ -541,6 +578,14 @@ export default function BeneficiaryDashboardPage() {
                                 onClaimSuccess={async () => {
                                     setActiveView("status");
                                 }}
+                            />
+                        )}
+
+                        {activeView === "receipt" && (
+                            <ClaimReceiptView 
+                                receiptData={receiptData}
+                                producerSub={producerSub}
+                                onPrint={() => window.print()}
                             />
                         )}
                     </>
@@ -843,6 +888,249 @@ function InfoItem({ label, value }: { label: string; value: string }) {
             </span>
             <span style={{ fontSize: 15, color: "#0f172a", fontWeight: 600 }}>{value}</span>
         </div>
+    );
+}
+
+/* ── Claim Receipt View ── */
+function ClaimReceiptView({ receiptData, producerSub, onPrint }: { 
+    receiptData: any; 
+    producerSub: Submission | null | undefined; 
+    onPrint: () => void;
+}) {
+    if (!receiptData) {
+        return (
+            <section style={styles.card}>
+                <div style={{ textAlign: "center", padding: "48px 24px" }}>
+                    <div style={{ fontSize: 64, marginBottom: 24, opacity: 0.5 }}>📄</div>
+                    <h2 style={{ ...styles.h2, fontSize: 20 }}>Receipt Not Available</h2>
+                    <p style={{ color: "#666", maxWidth: 400, margin: "0 auto 32px", lineHeight: 1.6 }}>
+                        Claim receipt details are being processed. Please check back in a few moments.
+                    </p>
+                </div>
+            </section>
+        );
+    }
+
+    const receipt = receiptData.receiptData || receiptData;
+    const nodeHandovers = receipt.nodeHandovers || [];
+    const blockchainLogs = receipt.blockchainLogs || [];
+
+    return (
+        <section style={styles.card}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 32 }}>
+                <div>
+                    <h2 style={styles.h2}>Official Claim Receipt</h2>
+                    <p style={{ fontSize: 13, color: "#666", marginTop: 4 }}>
+                        Government verified subsidy distribution record
+                    </p>
+                </div>
+                <button
+                    onClick={onPrint}
+                    style={{ ...styles.cancelBtn, padding: "10px 20px", background: "#f0fdf4", color: "#16a34a", borderColor: "#bbf7d0" }}
+                >
+                    🖨️ Print Receipt
+                </button>
+            </div>
+
+            {/* Receipt Header */}
+            <div style={{ background: "#f8fafc", padding: 24, borderRadius: 16, marginBottom: 24, border: "1px solid #e2e8f0" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                    <div>
+                        <div style={{ fontSize: 12, color: "#64748b", fontWeight: 600, marginBottom: 4 }}>RECEIPT ID</div>
+                        <div style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", fontFamily: "monospace" }}>
+                            {receipt.receiptId || 'N/A'}
+                        </div>
+                    </div>
+                    <div style={{ textAlign: "right" }}>
+                        <div style={{ fontSize: 12, color: "#64748b", fontWeight: 600, marginBottom: 4 }}>BLOCKCHAIN ID</div>
+                        <div style={{ fontSize: 16, fontWeight: 700, color: "#2563eb" }}>
+                            #{receipt.itemId || 'N/A'}
+                        </div>
+                    </div>
+                </div>
+                
+                <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+                    {receipt.ipfsCid && (
+                        <a
+                            href={`https://gateway.pinata.cloud/ipfs/${receipt.ipfsCid}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                                fontSize: 11, background: "#f0fdf4", color: "#16a34a",
+                                padding: "4px 10px", borderRadius: 100, fontWeight: 600,
+                                textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6,
+                                border: "1px solid #dcfce7"
+                            }}
+                        >
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            IPFS: {receipt.ipfsCid.substring(0, 10)}...
+                        </a>
+                    )}
+                    {receipt.claimDetails?.claimTransactionHash && (
+                        <a
+                            href={`https://etherscan.io/tx/${receipt.claimDetails.claimTransactionHash}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                                fontSize: 11, background: "#eff6ff", color: "#2563eb",
+                                padding: "4px 10px", borderRadius: 100, fontFamily: "monospace",
+                                textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6,
+                                border: "1px solid #dbeafe", fontWeight: 600
+                            }}
+                        >
+                            TX: {receipt.claimDetails.claimTransactionHash.substring(0, 10)}...
+                        </a>
+                    )}
+                </div>
+            </div>
+
+            {/* Beneficiary Information */}
+            <div style={{ marginBottom: 24 }}>
+                <h3 style={{ fontSize: 16, fontWeight: 700, color: "#1e293b", marginBottom: 16 }}>Beneficiary Information</h3>
+                <div style={styles.grid}>
+                    <InfoItem label="Name" value={receipt.beneficiary?.name || producerSub?.name || "N/A"} />
+                    <InfoItem label="District" value={receipt.beneficiary?.district || producerSub?.district || "N/A"} />
+                    <InfoItem label="Phone" value={receipt.beneficiary?.phone || producerSub?.phone || "N/A"} />
+                    <InfoItem label="Application ID" value={receipt.beneficiary?.applicationId || producerSub?.id || "N/A"} />
+                </div>
+            </div>
+
+            {/* Claim Details */}
+            <div style={{ marginBottom: 24 }}>
+                <h3 style={{ fontSize: 16, fontWeight: 700, color: "#1e293b", marginBottom: 16 }}>Claim Details</h3>
+                <div style={styles.grid}>
+                    <InfoItem 
+                        label="Claim Date & Time" 
+                        value={receipt.claimDetails?.claimedAt ? 
+                            new Date(receipt.claimDetails.claimAt).toLocaleString("en-US", {
+                                month: "short", day: "numeric", year: "numeric",
+                                hour: "2-digit", minute: "2-digit"
+                            }) : "N/A"
+                        } 
+                    />
+                    <InfoItem label="Status" value={receipt.claimDetails?.status || "N/A"} />
+                    <InfoItem label="Stage" value={`Stage ${receipt.claimDetails?.stage || "N/A"} - Claimed`} />
+                    <InfoItem label="Subsidy Type" value="Fertilizer Subsidy" />
+                </div>
+            </div>
+
+            {/* Node Handover Timeline */}
+            {nodeHandovers.length > 0 && (
+                <div style={{ marginBottom: 24 }}>
+                    <h3 style={{ fontSize: 16, fontWeight: 700, color: "#1e293b", marginBottom: 16 }}>Processing Node History</h3>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                        {nodeHandovers.map((node: any, index: number) => (
+                            <div key={node.nodeId} style={{
+                                display: "flex", 
+                                justifyContent: "space-between", 
+                                alignItems: "center",
+                                padding: "16px 20px",
+                                background: "#ffffff",
+                                border: "1px solid #f1f5f9",
+                                borderRadius: 16,
+                                transition: "all 0.2s ease"
+                            }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                                    <div style={{
+                                        width: 40, height: 40, borderRadius: "50%",
+                                        background: node.status === "approved" ? "#1e8e3e" : "#3D4B9C",
+                                        display: "flex", alignItems: "center", justifyContent: "center", 
+                                        color: "white", fontSize: 18
+                                    }}>
+                                        {node.nodeRole === "producer" ? "🏛️" : node.nodeRole === "transporter" ? "🚚" : "📍"}
+                                    </div>
+                                    <div>
+                                        <div style={{ fontSize: 14, fontWeight: 700 }}>{node.nodeName}</div>
+                                        <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 2 }}>
+                                            <span style={{
+                                                fontSize: 10, fontWeight: 800, textTransform: "uppercase",
+                                                padding: "2px 8px", borderRadius: 100, background: "#f1f5f9", color: "#475569"
+                                            }}>
+                                                {node.nodeRole}
+                                            </span>
+                                            <span style={{ fontSize: 11, color: "#666" }}>{node.nodeDistrict}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style={{ textAlign: "right" }}>
+                                    <div style={{ fontSize: 12, fontWeight: 700, color: "#16a34a" }}>
+                                        {node.status === "approved" ? "✓ Verified" : "● Processing"}
+                                    </div>
+                                    <div style={{ fontSize: 10, color: "#9ca3af", marginTop: 2 }}>
+                                        Handover: {new Date(node.handoverTime).toLocaleDateString()}
+                                    </div>
+                                    {node.approvedAt && (
+                                        <div style={{ fontSize: 10, color: "#9ca3af" }}>
+                                            Approved: {new Date(node.approvedAt).toLocaleDateString()}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Blockchain Verification */}
+            {blockchainLogs.length > 0 && (
+                <div style={{ marginBottom: 24 }}>
+                    <h3 style={{ fontSize: 16, fontWeight: 700, color: "#1e293b", marginBottom: 16 }}>Blockchain Verification</h3>
+                    <div style={{ background: "#f8fafc", padding: 16, borderRadius: 12, border: "1px solid #e2e8f0" }}>
+                        <div style={{ fontSize: 12, color: "#64748b", marginBottom: 8 }}>TRANSACTION EVENTS</div>
+                        {blockchainLogs.map((log: any, index: number) => (
+                            <div key={index} style={{ 
+                                display: "flex", 
+                                justifyContent: "space-between", 
+                                alignItems: "center",
+                                padding: "8px 0",
+                                borderBottom: index < blockchainLogs.length - 1 ? "1px solid #e2e8f0" : "none"
+                            }}>
+                                <div>
+                                    <div style={{ fontSize: 12, fontWeight: 600 }}>{log.eventName}</div>
+                                    <div style={{ fontSize: 10, color: "#666", fontFamily: "monospace" }}>
+                                        Block: {log.blockNumber}
+                                    </div>
+                                </div>
+                                <a
+                                    href={`https://etherscan.io/tx/${log.transactionHash}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{
+                                        fontSize: 10, color: "#2563eb", textDecoration: "none", fontFamily: "monospace"
+                                    }}
+                                >
+                                    {log.transactionHash.substring(0, 8)}...
+                                </a>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Footer */}
+            <div style={{ 
+                marginTop: 32, 
+                padding: 16, 
+                background: "#f8fafc", 
+                borderRadius: 12, 
+                border: "1px solid #e2e8f0",
+                textAlign: "center"
+            }}>
+                <div style={{ fontSize: 11, color: "#64748b", marginBottom: 4 }}>
+                    This receipt is cryptographically secured on the blockchain
+                </div>
+                <div style={{ fontSize: 10, color: "#94a3b8" }}>
+                    Generated on {receipt.metadata?.generatedAt ? 
+                        new Date(receipt.metadata.generatedAt).toLocaleString("en-US") : 
+                        new Date().toLocaleString("en-US")
+                    }
+                </div>
+            </div>
+        </section>
     );
 }
 
