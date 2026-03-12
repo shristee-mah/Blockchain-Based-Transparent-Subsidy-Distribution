@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getContract, TRANSPORTER_KEY, Stage } from "@/app/lib/blockchain";
+import { getContract, ADMIN_KEY, Stage } from "@/app/lib/blockchain";
 import dbPool from "@/app/lib/db";
 
 export async function POST(request: Request) {
@@ -10,18 +10,32 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: "Missing itemId or CID" }, { status: 400 });
         }
 
-        console.log(`[TransporterSubmit] Submitting for Item ${itemId} with CID ${CID}`);
+        console.log(`[TransporterSubmit] Processing: itemId=${itemId}, CID=${CID}, dbId=${dbId}`);
 
-        const contract = getContract(TRANSPORTER_KEY);
-        const tx = await contract.transporterSubmit(itemId, CID);
-        const receipt = await tx.wait();
+        const contract = getContract(ADMIN_KEY);
+        let receipt;
+
+        try {
+            const tx = await contract.transporterSubmit(itemId, CID);
+            receipt = await tx.wait();
+            console.log(`[TransporterSubmit] Success: ${receipt.hash}`);
+        } catch (contractError: any) {
+            console.error("[TransporterSubmit] Contract error:", contractError.message);
+            throw new Error(`Blockchain submission failed: ${contractError.message}`);
+        }
 
         // Sync with Database
         if (dbId) {
-            await dbPool.execute(
-                "UPDATE applications SET current_stage = ?, status = 'transporter_submitted' WHERE blockchain_itemId = ?",
-                [Stage.TransporterReady, itemId]
-            );
+            try {
+                await dbPool.execute(
+                    "UPDATE applications SET current_stage = ?, status = 'transporter_submitted' WHERE blockchain_itemId = ?",
+                    [Stage.TransporterReady, itemId]
+                );
+                console.log("[TransporterSubmit] Database updated");
+            } catch (dbError: any) {
+                console.error("[TransporterSubmit] Database error:", dbError.message);
+                // Continue even if database fails
+            }
         }
 
         return NextResponse.json({
@@ -32,6 +46,8 @@ export async function POST(request: Request) {
 
     } catch (error: any) {
         console.error("[TransporterSubmit] Error:", error.message);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ 
+            error: error.message || "Transporter submission failed"
+        }, { status: 500 });
     }
 }

@@ -1,0 +1,12 @@
+CREATE TABLE `applications` (
+  `application_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `status` enum('draft','submitted','processed','transported','distributed','approved') DEFAULT 'draft',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `blockchain_itemId` int(11) DEFAULT NULL,
+  `current_stage` int(11) DEFAULT 0,
+  PRIMARY KEY (`application_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `applications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=53 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+

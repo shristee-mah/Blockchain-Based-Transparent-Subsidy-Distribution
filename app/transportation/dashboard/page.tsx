@@ -229,6 +229,7 @@ export default function TransporterDashboardPage() {
   const [expandedQR, setExpandedQR] = useState<Submission | null>(null);
   const [scannedItemId, setScannedItemId] = useState<number | null>(null);
   const [scannedCID, setScannedCID] = useState<string>("");
+  const [isVerified, setIsVerified] = useState(false);
 
   useEffect(() => {
     if (!toast.show) return;
@@ -320,6 +321,11 @@ export default function TransporterDashboardPage() {
   //     });
 
   const handleSubmit = async () => {
+    if (!isVerified) {
+      showToast("Verification Required: Please scan the handover QR code first.", "error");
+      return;
+    }
+
     if (files.length === 0 || !transporterName || !district) {
       showToast("Please fill all fields and attach documentation.", "error");
       return;
@@ -345,17 +351,67 @@ export default function TransporterDashboardPage() {
       // 2. Submit to Blockchain (TransporterAction)
       if (scannedItemId !== null) {
         showToast("Documents uploaded. Sending to blockchain...");
-        const bcRes = await fetch("/api/blockchain/transport", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            itemId: scannedItemId,
-            CID: subData.cid || "QmError",
-            dbId: subData.id
-          }),
-        });
-        if (!bcRes.ok) throw new Error("Blockchain transaction failed");
-        showToast("✓ Blockchain Synced: Status moved to TransporterReady");
+        try {
+          const bcRes = await fetch("/api/blockchain/transport", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              itemId: scannedItemId,
+              CID: subData.cid || "QmError",
+              dbId: subData.id
+            }),
+          });
+          
+          if (!bcRes.ok) {
+            const errorData = await bcRes.json();
+            
+            // Enhanced error handling with specific blockchain error decoding
+            let userFriendlyMessage = "Blockchain transaction failed";
+            
+            if (errorData.code) {
+              switch (errorData.code) {
+                case "CONTRACT_REVERT":
+                  userFriendlyMessage = "Contract rejected: " + (errorData.error || "Invalid transaction state");
+                  break;
+                case "INSUFFICIENT_FUNDS":
+                  userFriendlyMessage = "Insufficient funds for transaction gas";
+                  break;
+                case "GAS_ERROR":
+                  userFriendlyMessage = "Gas estimation failed - transaction may be too complex";
+                  break;
+                case "NONCE_ERROR":
+                  userFriendlyMessage = "Transaction sequence error - please try again";
+                  break;
+                case "NETWORK_ERROR":
+                  userFriendlyMessage = "Network connection issue - please check your connection";
+                  break;
+                default:
+                  userFriendlyMessage = `Blockchain error (${errorData.code}): ${errorData.error}`;
+              }
+            } else if (errorData.error) {
+              userFriendlyMessage = errorData.error;
+            }
+            
+            console.error("[Blockchain] Detailed error:", errorData);
+            throw new Error(userFriendlyMessage);
+          }
+          
+          const bcResult = await bcRes.json();
+          showToast("✓ Blockchain Synced: Status moved to TransporterReady");
+          
+          // Fire-and-forget: log the event for this item
+          fetch("/api/blockchain/logEvent", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ itemId: scannedItemId }),
+          }).then(r => r.json()).then(data =>
+            console.log("[logEvent] Transport events:", data.totalEvents)
+          ).catch(e => console.warn("[logEvent] Transport log failed:", e));
+          
+        } catch (blockchainError: any) {
+          console.error("[Blockchain] Transaction failed:", blockchainError);
+          throw blockchainError; // Re-throw to be caught by outer try-catch
+        }
       } else {
         showToast("Documents submitted. (Warning: No blockchain ID linked)");
       }
@@ -364,7 +420,10 @@ export default function TransporterDashboardPage() {
       setTransporterName("");
       setDistrict("");
       setScannedItemId(null);
+      setScannedCID("");
+      setIsVerified(false);
       fetchMyDocs();
+      showToast("✓ Handover Logged Successfully", "success");
     } catch (err: any) {
       showToast("Error: " + err.message, "error");
     } finally {
@@ -460,12 +519,39 @@ export default function TransporterDashboardPage() {
                   const cleaned = res.trim();
                   console.log("[QRScan Transport] Raw:", cleaned);
                   const data = JSON.parse(cleaned);
-                  // itemId may be null if blockchain isn't connected — use submissionId as fallback
                   if (!data.submissionId) throw new Error("Not a system QR code");
+                  if (data.itemId == null) throw new Error("Invalid Item: Missing Blockchain ID. Waiting for Admin verification.");
+
+                  // Security check: Only allow QRs intended for transporters
+                  if (data.nextStage !== "transporter_handover") {
+                    throw new Error("Invalid Role: This QR is not intended for the Transporter node.");
+                  }
+
                   setScannedItemId(data.itemId ?? null);
                   setScannedCID(data.cid || "");
+                  setIsVerified(true);
                   const idLabel = data.itemId != null ? `Chain #${data.itemId}` : data.submissionId;
                   showToast(`✓ Verified: ${idLabel}`);
+
+                  // Immediate status update for beneficiary timeline
+                  if (data.itemId !== undefined && data.itemId !== null) {
+                    fetch("/api/submissions/logScan", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        itemId: data.itemId,
+                        submissionId: data.submissionId,
+                        nextStage: data.nextStage
+                      }),
+                    }).then(async r => {
+                      const resBody = await r.json();
+                      if (resBody.alreadyProcessed) {
+                        showToast("ℹ Handover already recorded (Duplicate Scan)");
+                      } else {
+                        showToast("✓ Progress Logged to Beneficiary Timeline");
+                      }
+                    }).catch(err => console.error("[ScanLog] failed:", err));
+                  }
                 } catch (e: any) {
                   console.error("[QRScan] Error:", res, e);
                   showToast(`QR Error: ${e.message}`, "error");
@@ -567,6 +653,24 @@ export default function TransporterDashboardPage() {
               ))}
             </div>
 
+            {!isVerified && (
+              <div style={{
+                background: "#fffbeb",
+                border: "1px solid #fbbf24",
+                borderRadius: 8,
+                padding: "12px 16px",
+                marginBottom: 20,
+                display: "flex",
+                alignItems: "center",
+                gap: 12
+              }}>
+                <span style={{ fontSize: 20 }}>⚠️</span>
+                <div style={{ fontSize: 13, color: "#92400e", fontWeight: 500 }}>
+                  Form Locked: You must scan the Handover QR code above before you can submit any documents.
+                </div>
+              </div>
+            )}
+
             {files.length > 0 && (
               <div style={styles.fileList}>
                 <div
@@ -637,11 +741,16 @@ export default function TransporterDashboardPage() {
 
             <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
               <button
-                style={{ ...styles.primary, opacity: isSubmitting ? 0.7 : 1 }}
+                style={{
+                  ...styles.primary,
+                  opacity: (isSubmitting || !isVerified) ? 0.7 : 1,
+                  cursor: !isVerified ? "not-allowed" : "pointer",
+                  background: !isVerified ? "#9ca3af" : "#3D4B9C"
+                }}
                 onClick={handleSubmit}
-                disabled={isSubmitting}
+                disabled={isSubmitting || !isVerified}
               >
-                {isSubmitting ? "Submitting..." : "Submit"}
+                {isSubmitting ? "Submitting..." : "Submit Handover Proof"}
               </button>
               <button
                 style={styles.secondary}

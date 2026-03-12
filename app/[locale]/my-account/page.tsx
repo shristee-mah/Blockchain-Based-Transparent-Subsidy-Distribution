@@ -1,12 +1,14 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 const BLUE = "#3D4B9C";
 
 export default function MyAccountPage() {
   const router = useRouter();
+  const params = useParams();
+  const locale = params.locale as string;
   const [step, setStep] = useState<"phone" | "otp">("phone");
   const [phone, setPhone] = useState("");
   const [phoneError, setPhoneError] = useState("");
@@ -48,7 +50,7 @@ export default function MyAccountPage() {
   };
 
   const handleVerify = () => {
-    router.push(`/en/my-account/dashboard?phone=${encodeURIComponent(phone)}`);
+    router.push(`/${locale}/my-account/dashboard?phone=${encodeURIComponent(phone)}`);
   };
 
   return (

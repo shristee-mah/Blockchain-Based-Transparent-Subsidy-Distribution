@@ -105,7 +105,64 @@ export async function GET(request: Request) {
     if (phone) data = data.filter((s) => s.phone === phone);
     if (applicationId) data = data.filter((s) => s.applicationId === applicationId);
 
-    console.log('[submissions] GET —', data.length, 'records');
+    // Sync current_stage from MySQL applications table for all returned items
+    try {
+      const bcItemIds = data.map(s => s.blockchain_itemId).filter(id => id !== undefined && id !== null);
+      const mySqlIds = data.map(s => s.applicationId).filter(id => id !== undefined && id !== null).map(id => Number(id));
+
+      if (bcItemIds.length > 0 || mySqlIds.length > 0) {
+        let bcRows: any[] = [];
+        let mysqlRows: any[] = [];
+
+        if (bcItemIds.length > 0) {
+          const placeholders = bcItemIds.map(() => '?').join(',');
+          [bcRows] = (await dbPool.execute(
+            `SELECT application_id as id, blockchain_itemId, current_stage FROM applications WHERE blockchain_itemId IN (${placeholders})`,
+            bcItemIds
+          )) as any;
+        }
+
+        if (mySqlIds.length > 0) {
+          const placeholders = mySqlIds.map(() => '?').join(',');
+          [mysqlRows] = (await dbPool.execute(
+            `SELECT application_id as id, blockchain_itemId, current_stage FROM applications WHERE application_id IN (${placeholders})`,
+            mySqlIds
+          )) as any;
+        }
+
+        // Combine results into robust maps for stage AND ID sync
+        const dbDataByBcId = Object.fromEntries(bcRows.map((r: any) => [String(r.blockchain_itemId), r]));
+        const dbDataBySqlId = Object.fromEntries([...bcRows, ...mysqlRows].map((r: any) => [String(r.id), r]));
+
+        data = data.map(s => {
+          let stage = s.current_stage;
+          let bcId = s.blockchain_itemId;
+
+          // Sync by Blockchain ID (if we have it already)
+          if (bcId !== undefined && bcId !== null) {
+            const row = dbDataByBcId[String(bcId)];
+            if (row) {
+              stage = row.current_stage;
+            }
+          }
+          // Sync by Application ID (to find newly assigned bcId)
+          if (s.applicationId) {
+            const row = dbDataBySqlId[String(s.applicationId)];
+            if (row) {
+              stage = row.current_stage;
+              if (bcId === undefined || bcId === null) {
+                bcId = row.blockchain_itemId !== null ? Number(row.blockchain_itemId) : bcId;
+              }
+            }
+          }
+          return { ...s, current_stage: stage, blockchain_itemId: bcId };
+        });
+      }
+    } catch (dbErr: any) {
+      console.warn("[submissions GET] Could not sync stages from DB:", dbErr.message);
+    }
+
+    console.log('[submissions] GET —', data.length, 'records (synced stages)');
     return NextResponse.json(data);
   } catch (error) {
     console.error('API GET Error:', error);
@@ -163,31 +220,14 @@ export async function POST(request: Request) {
       }
 
       // ---------------- BREAKING: BLOCKCHAIN INTEGRATION ----------------
-      // Create item on blockchain if role is producer (processor)
+      // Shifted: Item is now created by the Admin during Verification/Release.
+      // This ensures itemID is only minted once verified.
       let blockchainItemId: number | null = null;
       const passedBcId = formData.get('blockchain_itemId');
       if (passedBcId) blockchainItemId = Number(passedBcId);
 
-      if (role === 'producer' && !blockchainItemId) {
-        try {
-          const contract = getContract(ADMIN_KEY); // Or use a separate processor key
-          // Use a dummy address for beneficiary if not provided, or take it from the form
-          const beneficiaryAddress = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"; // Default Hardhat Account #1
-          const tx = await contract.createItem(beneficiaryAddress, uploadedCIDs[0] || "QmNone");
-          const receipt = await tx.wait();
-
-          // Extract itemId from ItemCreated event
-          const event = receipt.logs.find((log: any) => log.fragment?.name === 'ItemCreated');
-          if (event) {
-            blockchainItemId = Number(event.args[0]);
-            console.log(`[blockchain] Created Item ID ${blockchainItemId}`);
-          }
-        } catch (bcErr: any) {
-          console.error("[blockchain] Failed to create item:", bcErr.message);
-        }
-      }
-
       // Sync with applications table
+      let mySqlAppId: number | undefined = undefined;
       try {
         if (blockchainItemId !== null) {
           // Check if it already exists to avoid duplicates in the sync table
@@ -198,24 +238,34 @@ export async function POST(request: Request) {
 
           if (rows.length > 0) {
             await dbPool.execute(
-              "UPDATE applications SET status = ?, updated_at = NOW() WHERE blockchain_itemId = ?",
+              "UPDATE applications SET status = ? WHERE blockchain_itemId = ?",
               ['pending', blockchainItemId]
             );
+            mySqlAppId = rows[0].id;
           } else {
-            await dbPool.execute(
+            const [result]: any = await dbPool.execute(
               "INSERT INTO applications (status, blockchain_itemId, current_stage, created_at) VALUES (?, ?, ?, NOW())",
               ['pending', blockchainItemId, Stage.Created]
             );
+            mySqlAppId = (result as any).insertId;
           }
         } else {
           // Fallback for non-blockchain items or if creation failed
-          await dbPool.execute(
+          const [result]: any = await dbPool.execute(
             "INSERT INTO applications (status, current_stage, created_at) VALUES (?, ?, NOW())",
             ['pending', Stage.Created]
           );
+          mySqlAppId = (result as any).insertId;
         }
       } catch (dbAppErr: any) {
         console.error("[db] applications table sync failed (proceeding with JSON only):", dbAppErr.message);
+      }
+
+      let submissionStage: number | undefined = undefined;
+      if (blockchainItemId !== null) {
+        if (role === 'producer') submissionStage = Stage.Created;
+        else if (role === 'transporter') submissionStage = Stage.TransporterReady;
+        else if (role === 'distributor') submissionStage = Stage.DistributorReady;
       }
 
       const newSubmission: Submission = {
@@ -227,10 +277,10 @@ export async function POST(request: Request) {
         createdAt: new Date().toISOString(),
         docs,
         cid: uploadedCIDs[0],
-        blockchain_itemId: blockchainItemId || undefined,
-        current_stage: blockchainItemId !== null ? Stage.Created : undefined,
+        blockchain_itemId: blockchainItemId !== null ? Number(blockchainItemId) : undefined,
+        current_stage: submissionStage,
+        applicationId: mySqlAppId ? String(mySqlAppId) : (applicationId ?? undefined),
         ...(phone && { phone }),
-        ...(applicationId && { applicationId }),
       };
 
       const db = read();
@@ -238,7 +288,7 @@ export async function POST(request: Request) {
       write(db);
 
       console.log('[submissions] POST (FormData) — id:', newSubmission.id,
-        '| role:', newSubmission.role, '| CIDs:', uploadedCIDs, '| BC_ID:', blockchainItemId);
+        '| role:', newSubmission.role, '| CIDs:', uploadedCIDs, '| BC_ID:', blockchainItemId, '| mySqlAppId:', mySqlAppId);
 
       return NextResponse.json(newSubmission, { status: 201 });
     }
@@ -308,19 +358,20 @@ export async function PATCH(request: Request) {
         );
         if (rows && rows.length > 0) {
           bcData = rows[0];
+          bcData.id = bcData.application_id; // Aliasing for safety if needed
           console.log(`[PATCH] Found blockchain data for ${id} via BC_ID:`, bcData);
         }
       } else {
-        // Fallback to searching by the timestamp segment of the ID if it's stored that way in DB
-        // (This is mostly for legacy/debugging, as applications table id is usually auto-increment)
-        const numericId = id.split("-")[1];
+        // Fallback: search by the linked MySQL application ID if available
+        const searchId = existing.applicationId || id.split("-")[1];
         const [rows]: any = await dbPool.execute(
           "SELECT blockchain_itemId, current_stage FROM applications WHERE id = ?",
-          [numericId]
+          [searchId]
         );
         if (rows && rows.length > 0) {
           bcData = rows[0];
-          console.log(`[PATCH] Found blockchain data for ${id} via numericId fallback:`, bcData);
+          bcData.id = bcData.application_id;
+          console.log(`[PATCH] Found blockchain data for ${id} via applicationId (${searchId}):`, bcData);
         }
       }
     } catch (dbErr: any) {
@@ -337,14 +388,21 @@ export async function PATCH(request: Request) {
             : 'beneficiary_delivery'
         : undefined;
 
-    // Resolve the blockchain item ID — fall back to the submission ID itself when DB is unavailable
-    const resolvedItemId = bcData.blockchain_itemId ?? existing.blockchain_itemId ?? null;
+    // Resolve the blockchain item ID
+    let resolvedItemId = bcData.blockchain_itemId ?? existing.blockchain_itemId ?? null;
+    const currentStage = bcData.current_stage ?? existing.current_stage ?? 0;
+
+    // We ONLY sync local status here to 'approved'. The actual blockchain minting 
+    // happens when the user subsequently calls POST /api/blockchain/verify.
+    if (status === 'approved' && resolvedItemId === null) {
+      console.warn(`[PATCH] Warning: Approving item ${id} locally. Blockchain sync will mint the item in the next step.`);
+    }
 
     const qrData =
       status === 'approved'
         ? JSON.stringify({
-          itemId: resolvedItemId,           // number | null — scanner must tolerate null
-          submissionId: existing.id,        // always present
+          itemId: resolvedItemId !== null ? Number(resolvedItemId) : null,
+          submissionId: existing.id,
           currentStage: bcData.current_stage ?? existing.current_stage ?? 0,
           role: existing.role,
           cid: existing.cid ?? null,
@@ -354,6 +412,13 @@ export async function PATCH(request: Request) {
         })
         : undefined;
 
+    let nextStageNum = bcData.current_stage;
+    if (status === 'approved' && (nextStageNum === undefined || nextStageNum === existing.current_stage)) {
+      if (existing.role === 'producer') nextStageNum = Stage.VerifiedByAdmin; // 1
+      else if (existing.role === 'transporter') nextStageNum = Stage.InTransit; // 3
+      else if (existing.role === 'distributor') nextStageNum = Stage.Distributed; // 5
+    }
+
     db[index] = {
       ...existing,
       status,
@@ -361,8 +426,10 @@ export async function PATCH(request: Request) {
       approvedAt: new Date().toISOString(),
       qrData,
       nextStage,
-      blockchain_itemId: bcData.blockchain_itemId,
-      current_stage: bcData.current_stage,
+      blockchain_itemId: (bcData.blockchain_itemId ?? existing.blockchain_itemId) !== undefined
+        ? Number(bcData.blockchain_itemId ?? existing.blockchain_itemId)
+        : undefined,
+      current_stage: nextStageNum,
     };
 
     write(db);

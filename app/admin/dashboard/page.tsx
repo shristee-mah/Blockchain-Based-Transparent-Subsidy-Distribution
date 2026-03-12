@@ -84,6 +84,9 @@ export default function AdminDashboardPage() {
   const handleAction = async (id: string, status: "approved" | "rejected") => {
     setActionLoading(true);
     try {
+      // Capture the stage BEFORE the patch to pass to blockchain verification
+      const beforeStage = submissions.find(s => s.id === id)?.current_stage ?? 0;
+
       const response = await fetch("/api/submissions", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -94,16 +97,12 @@ export default function AdminDashboardPage() {
       setSubmissions((prev) => prev.map((s) => (s.id === id ? updated : s)));
       setReviewingItem(updated);
 
-      // Automatic Blockchain Verification if approved
-      if (status === "approved" && updated.blockchain_itemId !== undefined) {
+      if (status === "approved") {
         showToast("✓ Approved. Syncing with blockchain...");
-        await handleVerifyOnChain(updated.blockchain_itemId, updated.current_stage || 0, updated.id);
+        const numericId = updated.blockchain_itemId != null ? Number(updated.blockchain_itemId) : 0;
+        await handleVerifyOnChain(numericId, beforeStage, updated.id);
       } else {
-        showToast(
-          status === "approved"
-            ? `✓ Approved — QR released to ${nextActor(updated.role)}`
-            : "✗ Document rejected.",
-        );
+        showToast("✗ Document rejected.");
       }
     } catch (err) {
       showToast("Error performing action");
@@ -115,16 +114,46 @@ export default function AdminDashboardPage() {
 
   const handleVerifyOnChain = async (itemId: number, currentStage: number, dbId: string) => {
     try {
+      console.log("[AdminVerify] Starting verification:", { itemId, currentStage, dbId });
+      
       const res = await fetch("/api/blockchain/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ itemId, currentStage, dbId }),
       });
-      if (!res.ok) throw new Error("Blockchain verification failed");
+      
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("[AdminVerify] Failed:", errorText);
+        
+        let errorMessage = "Blockchain verification failed";
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.error || errorMessage;
+        } catch {
+          errorMessage = `HTTP ${res.status}: ${res.statusText}`;
+        }
+        
+        throw new Error(errorMessage);
+      }
+      
+      const result = await res.json();
+      console.log("[AdminVerify] Success:", result);
       showToast("✓ Blockchain Synced Successfully");
-    } catch (err) {
-      console.error(err);
-      showToast("⚠ Approved locally, but blockchain sync failed.");
+      await fetchSubmissions();
+      
+      // Log event
+      if (result.itemId) {
+        fetch("/api/blockchain/logEvent", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ itemId: result.itemId }),
+        }).catch(e => console.warn("[logEvent] failed:", e));
+      }
+      
+    } catch (err: any) {
+      console.error("[AdminVerify] Error:", err);
+      showToast("⚠ " + err.message);
     }
   };
 
@@ -253,16 +282,31 @@ export default function AdminDashboardPage() {
                     {new Date(reviewingItem.approvedAt).toLocaleString()}
                   </div>
                 )}
-                {/* ── REAL QR CODE DISPLAY ── */}
                 {reviewingItem.qrData && (
-                  <div style={{ marginTop: 20 }}>
+                  <div style={{ marginTop: 20, position: 'relative' }}>
                     <div style={{ fontSize: 11, fontWeight: 700, color: "#3D4B9C", marginBottom: 8 }}>Handover QR</div>
-                    <img
-                      src={`https://quickchart.io/qr?text=${encodeURIComponent(reviewingItem.qrData)}&size=180`}
-                      alt="Verified QR Code"
-                      style={{ border: "4px solid #fff", borderRadius: 12, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}
-                    />
-                    <div style={{ fontSize: 10, color: "#888", marginTop: 8 }}>Scan to link with Blockchain</div>
+                    <div style={{ opacity: reviewingItem.current_stage === 0 && reviewingItem.status === 'approved' ? 0.3 : 1 }}>
+                      <img
+                        src={`https://quickchart.io/qr?text=${encodeURIComponent(reviewingItem.qrData)}&size=180`}
+                        alt="Verified QR Code"
+                        style={{ border: "4px solid #fff", borderRadius: 12, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}
+                      />
+                    </div>
+                    {reviewingItem.current_stage === 0 && reviewingItem.status === 'approved' && (
+                      <div style={{
+                        position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+                        background: 'rgba(255,255,255,0.9)', padding: '8px 12px', borderRadius: 8,
+                        fontSize: 12, fontWeight: 700, color: '#3D4B9C', border: '1px solid #3D4B9C',
+                        textAlign: 'center', pointerEvents: 'none'
+                      }}>
+                        Blockchain Syncing...<br />Please wait
+                      </div>
+                    )}
+                    <div style={{ fontSize: 10, color: "#888", marginTop: 8 }}>
+                      {reviewingItem.current_stage === 0 && reviewingItem.status === 'approved'
+                        ? "⌛ Syncing with Blockchain"
+                        : "Scan to link with Blockchain"}
+                    </div>
                   </div>
                 )}
               </div>

@@ -1,20 +1,17 @@
-import db from "./app/lib/db.js";
+const mysql = require('mysql2/promise');
+require('dotenv').config();
 
-async function main() {
-    try {
-        const [rows] = await db.execute("DESCRIBE applications;");
-        console.log("Applications table schema:");
-        console.table(rows);
+async function checkDB() {
+    const connection = await mysql.createConnection({
+        host: 'localhost',
+        user: 'root',
+        password: '',
+        database: 'subsidy_system'
+    });
 
-        const [rows2] = await db.execute("SELECT * FROM applications LIMIT 5;");
-        console.log("Sample data from applications:");
-        console.table(rows2);
-
-        process.exit(0);
-    } catch (err) {
-        console.error("Error:", err);
-        process.exit(1);
-    }
+    const [rows] = await connection.execute('SELECT * FROM applications');
+    console.log(JSON.stringify(rows, null, 2));
+    await connection.end();
 }
 
-main();
+checkDB().catch(console.error);

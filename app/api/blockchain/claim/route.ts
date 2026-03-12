@@ -45,8 +45,11 @@ export async function POST(request: Request) {
                 txHash = tx.hash;
                 console.log(`[Claim] TX confirmed: ${txHash}`);
             } catch (bcErr: any) {
-                console.error('[Claim] Blockchain error (continuing with DB update):', bcErr.message);
-                // Don't fail hard — still update local state
+                console.error('[Claim] Blockchain error:', bcErr.message);
+                return NextResponse.json({
+                    error: 'Blockchain Claim Failed',
+                    details: bcErr.reason || bcErr.message
+                }, { status: 400 });
             }
         } else {
             console.warn('[Claim] No itemId — skipping blockchain call, updating local state only');
@@ -59,10 +62,10 @@ export async function POST(request: Request) {
                     "UPDATE applications SET current_stage = 6, status = 'claimed' WHERE blockchain_itemId = ?",
                     [itemId]
                 );
-            }
-            if (dbId) {
+            } else if (dbId && !String(dbId).startsWith('APP-')) {
+                // Fixed: use application_id instead of id safely
                 await dbPool.execute(
-                    "UPDATE applications SET current_stage = 6, status = 'claimed' WHERE id = ?",
+                    "UPDATE applications SET current_stage = 6, status = 'claimed' WHERE application_id = ?",
                     [dbId]
                 );
             }

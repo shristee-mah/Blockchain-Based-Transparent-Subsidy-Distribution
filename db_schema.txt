@@ -1,0 +1,36 @@
+[
+  {
+    "Tables_in_subsidy_system": "agreements"
+  },
+  {
+    "Tables_in_subsidy_system": "applications"
+  },
+  {
+    "Tables_in_subsidy_system": "beneficiary_general"
+  },
+  {
+    "Tables_in_subsidy_system": "beneficiary_kyc"
+  },
+  {
+    "Tables_in_subsidy_system": "documents"
+  },
+  {
+    "Tables_in_subsidy_system": "node_documents"
+  },
+  {
+    "Tables_in_subsidy_system": "subsidy_scheme"
+  },
+  {
+    "Tables_in_subsidy_system": "users"
+  }
+]
+
+CREATE TABLE `node_documents` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `node_role` varchar(50) DEFAULT NULL,
+  `node_id` int(11) DEFAULT NULL,
+  `document_type` varchar(100) DEFAULT NULL,
+  `ipfs_hash` text DEFAULT NULL,
+  `uploaded_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=76 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci

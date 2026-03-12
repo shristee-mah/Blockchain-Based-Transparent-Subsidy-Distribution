@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getContract, DISTRIBUTOR_KEY, Stage } from "@/app/lib/blockchain";
+import { getContract, ADMIN_KEY, Stage } from "@/app/lib/blockchain";
 import dbPool from "@/app/lib/db";
 
 export async function POST(request: Request) {
@@ -10,18 +10,32 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: "Missing itemId or CID" }, { status: 400 });
         }
 
-        console.log(`[DistributorSubmit] Submitting for Item ${itemId} with CID ${CID}`);
+        console.log(`[DistributorSubmit] Processing: itemId=${itemId}, CID=${CID}, dbId=${dbId}`);
 
-        const contract = getContract(DISTRIBUTOR_KEY);
-        const tx = await contract.distributorSubmit(itemId, CID);
-        const receipt = await tx.wait();
+        const contract = getContract(ADMIN_KEY);
+        let receipt;
+
+        try {
+            const tx = await contract.distributorSubmit(itemId, CID);
+            receipt = await tx.wait();
+            console.log(`[DistributorSubmit] Success: ${receipt.hash}`);
+        } catch (contractError: any) {
+            console.error("[DistributorSubmit] Contract error:", contractError.message);
+            throw new Error(`Blockchain submission failed: ${contractError.message}`);
+        }
 
         // Sync with Database
         if (dbId) {
-            await dbPool.execute(
-                "UPDATE applications SET current_stage = ?, status = 'distributor_submitted' WHERE blockchain_itemId = ?",
-                [Stage.DistributorReady, itemId]
-            );
+            try {
+                await dbPool.execute(
+                    "UPDATE applications SET current_stage = ?, status = 'distributor_submitted' WHERE blockchain_itemId = ?",
+                    [Stage.DistributorReady, itemId]
+                );
+                console.log("[DistributorSubmit] Database updated");
+            } catch (dbError: any) {
+                console.error("[DistributorSubmit] Database error:", dbError.message);
+                // Continue even if database fails
+            }
         }
 
         return NextResponse.json({
@@ -32,6 +46,8 @@ export async function POST(request: Request) {
 
     } catch (error: any) {
         console.error("[DistributorSubmit] Error:", error.message);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ 
+            error: error.message || "Distributor submission failed"
+        }, { status: 500 });
     }
 }

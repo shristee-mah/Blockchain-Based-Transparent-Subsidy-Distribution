@@ -210,6 +210,7 @@ export default function ProcessorDashboardPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [producerName, setProducerName] = useState("");
   const [district, setDistrict] = useState("");
+  const [beneficiaryPhone, setBeneficiaryPhone] = useState("");
   const [files, setFiles] = useState<FileData[]>([]);
   const [mySubmissions, setMySubmissions] = useState<Submission[]>([]);
   const [loadingStatus, setLoadingStatus] = useState(false);
@@ -316,6 +317,7 @@ export default function ProcessorDashboardPage() {
       formData.append("node_id", producerName);  // ✅ send producer ID explicitly
       formData.append("district", district);
       formData.append("role", "producer");
+      formData.append("phone", beneficiaryPhone);
 
       files.forEach((f) => {
         formData.append("files", f.file); // ✅ real File object
@@ -327,11 +329,23 @@ export default function ProcessorDashboardPage() {
       });
 
       if (!response.ok) throw new Error("Submission failed");
+      const subData = await response.json();
 
       showToast("Record successfully submitted to Admin.");
+
+      // Fire-and-forget: log the ItemCreated event if blockchain ID was returned
+      if (subData.blockchain_itemId !== undefined) {
+        fetch("/api/blockchain/logEvent", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ itemId: subData.blockchain_itemId }),
+        }).catch(e => console.warn("[logEvent] Processor log failed:", e));
+      }
+
       setFiles([]);
       setProducerName("");
       setDistrict("");
+      setBeneficiaryPhone("");
       fetchMySubmissions();
 
     } catch (err) {
@@ -471,6 +485,13 @@ export default function ProcessorDashboardPage() {
                 placeholder="District"
                 value={district}
                 onChange={(e) => setDistrict(e.target.value)}
+                style={styles.input}
+              />
+              <input
+                type="tel"
+                placeholder="Beneficiary Phone No."
+                value={beneficiaryPhone}
+                onChange={(e) => setBeneficiaryPhone(e.target.value)}
                 style={styles.input}
               />
             </div>
