@@ -1634,7 +1634,7 @@
     "name": "346",
     "district": "nnbcxjuj",
     "role": "transporter",
-    "status": "pending",
+    "status": "approved",
     "createdAt": "2026-03-12T14:09:25.670Z",
     "docs": [
       {
@@ -1644,7 +1644,11 @@
     ],
     "cid": "QmNqk72BNwQ9atWAjwF3Yvkztpv5DxUckGspBKyA8tvfgt",
     "blockchain_itemId": 3,
-    "current_stage": 2
+    "current_stage": 3,
+    "approvedBy": "Admin",
+    "approvedAt": "2026-03-12T16:13:26.872Z",
+    "qrData": "{\"itemId\":3,\"submissionId\":\"APP-1773324561966\",\"currentStage\":3,\"role\":\"transporter\",\"cid\":\"QmNqk72BNwQ9atWAjwF3Yvkztpv5DxUckGspBKyA8tvfgt\",\"nextStage\":\"distributor_handover\",\"verifiedAt\":\"2026-03-12T16:13:27.631Z\"}",
+    "nextStage": "distributor_handover"
   },
   {
     "id": "APP-1773328564361",
@@ -1880,5 +1884,72 @@
     "qrData": "{\"itemId\":184,\"submissionId\":\"APP-1773330694738\",\"currentStage\":5,\"role\":\"distributor\",\"cid\":\"QmfXr7X7rs7aBcXXABLFGDXJESBvUptQbMxTbs9BDvCgVs\",\"nextStage\":\"beneficiary_delivery\",\"verifiedAt\":\"2026-03-12T15:52:01.172Z\"}",
     "nextStage": "beneficiary_delivery",
     "claimedAt": "2026-03-12T15:53:50.939Z"
+  },
+  {
+    "id": "APP-1773331829865",
+    "name": "1234",
+    "district": "kathmandu",
+    "role": "producer",
+    "status": "claimed",
+    "createdAt": "2026-03-12T16:10:33.769Z",
+    "docs": [
+      {
+        "label": "workflowdia.png",
+        "fileType": "image/png"
+      }
+    ],
+    "cid": "QmY3sgbzyEbpnWARobLHfCVWpwXEzCC63MNq3trbJpruA1",
+    "blockchain_itemId": 520,
+    "current_stage": 6,
+    "phone": "111111111",
+    "approvedBy": "Admin",
+    "approvedAt": "2026-03-12T16:11:23.437Z",
+    "qrData": "{\"itemId\":520,\"submissionId\":\"APP-1773331829865\",\"currentStage\":1,\"role\":\"producer\",\"cid\":\"QmY3sgbzyEbpnWARobLHfCVWpwXEzCC63MNq3trbJpruA1\",\"nextStage\":\"transporter_handover\",\"verifiedAt\":\"2026-03-12T16:11:25.776Z\"}",
+    "nextStage": "transporter_handover",
+    "claimedAt": "2026-03-12T16:16:17.418Z"
+  },
+  {
+    "id": "APP-1773331971571",
+    "name": "1223",
+    "district": "Kathmandu",
+    "role": "transporter",
+    "status": "claimed",
+    "createdAt": "2026-03-12T16:12:55.897Z",
+    "docs": [
+      {
+        "label": "ChatGPT Image Mar 11, 2026, 03_11_39 PM.png",
+        "fileType": "image/png"
+      }
+    ],
+    "cid": "QmfXr7X7rs7aBcXXABLFGDXJESBvUptQbMxTbs9BDvCgVs",
+    "blockchain_itemId": 520,
+    "current_stage": 6,
+    "approvedBy": "Admin",
+    "approvedAt": "2026-03-12T16:13:51.023Z",
+    "qrData": "{\"itemId\":520,\"submissionId\":\"APP-1773331971571\",\"currentStage\":3,\"role\":\"transporter\",\"cid\":\"QmfXr7X7rs7aBcXXABLFGDXJESBvUptQbMxTbs9BDvCgVs\",\"nextStage\":\"distributor_handover\",\"verifiedAt\":\"2026-03-12T16:13:51.409Z\"}",
+    "nextStage": "distributor_handover",
+    "claimedAt": "2026-03-12T16:16:17.419Z"
+  },
+  {
+    "id": "APP-1773332093805",
+    "name": "1224",
+    "district": "Nawalparasi",
+    "role": "distributor",
+    "status": "claimed",
+    "createdAt": "2026-03-12T16:14:56.965Z",
+    "docs": [
+      {
+        "label": "userapplication system.png",
+        "fileType": "image/png"
+      }
+    ],
+    "cid": "QmbqjamneFR27jQgHaWrxFyoEq5RJvArYRtyjZW4U4bK74",
+    "blockchain_itemId": 520,
+    "current_stage": 6,
+    "approvedBy": "Admin",
+    "approvedAt": "2026-03-12T16:15:15.931Z",
+    "qrData": "{\"itemId\":520,\"submissionId\":\"APP-1773332093805\",\"currentStage\":5,\"role\":\"distributor\",\"cid\":\"QmbqjamneFR27jQgHaWrxFyoEq5RJvArYRtyjZW4U4bK74\",\"nextStage\":\"beneficiary_delivery\",\"verifiedAt\":\"2026-03-12T16:15:17.438Z\"}",
+    "nextStage": "beneficiary_delivery",
+    "claimedAt": "2026-03-12T16:16:17.420Z"
   }
 ]

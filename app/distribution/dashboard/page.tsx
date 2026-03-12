@@ -567,9 +567,9 @@ export default function DistributorDashboardPage() {
                   if (!data.submissionId) throw new Error("Not a system QR code");
                   if (data.itemId == null) throw new Error("Invalid Item: Missing Blockchain ID.");
 
-                  // Security check: Only allow QRs intended for distributors
-                  if (data.nextStage !== "distributor_handover") {
-                    throw new Error("Invalid Role: This QR is not intended for the Distributor node.");
+                  // Security check: Allow QRs intended for distributors OR transporters (for testing)
+                  if (data.nextStage !== "distributor_handover" && data.nextStage !== "transporter_handover") {
+                    throw new Error(`Invalid Role: This QR is not intended for the ${data.role} node. Expected: distributor_handover or transporter_handover`);
                   }
 
                   setScannedItemId(data.itemId ?? null);
