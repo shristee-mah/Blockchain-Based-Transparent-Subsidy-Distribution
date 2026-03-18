@@ -226,6 +226,394 @@ function resolveTimelineWithLogs(
 
 
 // ---------------------------------------------------------------------------
+// Enhanced Print Function for Claim Receipt
+// ---------------------------------------------------------------------------
+const createPrintableClaimReceipt = (receiptData: any, producerSub: Submission | null | undefined) => {
+    if (!receiptData) return null;
+    
+    const receipt = receiptData.receiptData || receiptData;
+    const nodeHandovers = receipt.nodeHandovers || [];
+    const blockchainLogs = receipt.blockchainLogs || [];
+    
+    const printContent = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Claim Receipt - ${receipt.receiptId || 'N/A'}</title>
+            <style>
+                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+                
+                @media print {
+                    body {
+                        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+                        font-size: 12pt;
+                        line-height: 1.4;
+                        color: #1e293b;
+                        background: white;
+                        margin: 0;
+                        padding: 20px;
+                    }
+                    
+                    .print-header {
+                        text-align: center;
+                        margin-bottom: 30px;
+                        border-bottom: 2px solid #3D4B9C;
+                        padding-bottom: 20px;
+                    }
+                    
+                    .print-header h1 {
+                        font-size: 24pt;
+                        font-weight: 800;
+                        color: #3D4B9C;
+                        margin: 0 0 10px 0;
+                    }
+                    
+                    .print-header p {
+                        font-size: 10pt;
+                        color: #666;
+                        margin: 0;
+                    }
+                    
+                    .print-section {
+                        margin-bottom: 25px;
+                        page-break-inside: avoid;
+                    }
+                    
+                    .print-section h2 {
+                        font-size: 16pt;
+                        font-weight: 700;
+                        color: #1e293b;
+                        margin: 0 0 15px 0;
+                        border-bottom: 1px solid #e2e8f0;
+                        padding-bottom: 8px;
+                    }
+                    
+                    .print-grid {
+                        display: grid;
+                        grid-template-columns: repeat(2, 1fr);
+                        gap: 15px;
+                        margin-bottom: 20px;
+                    }
+                    
+                    .print-info-item {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 4px;
+                    }
+                    
+                    .print-info-label {
+                        font-size: 9pt;
+                        font-weight: 800;
+                        color: #64748b;
+                        text-transform: uppercase;
+                        letter-spacing: 0.05em;
+                    }
+                    
+                    .print-info-value {
+                        font-size: 11pt;
+                        font-weight: 600;
+                        color: #0f172a;
+                    }
+                    
+                    .print-receipt-meta {
+                        background: #f8fafc;
+                        padding: 15px;
+                        border-radius: 8px;
+                        border: 1px solid #e2e8f0;
+                        margin-bottom: 20px;
+                    }
+                    
+                    .print-receipt-id {
+                        font-size: 16pt;
+                        font-weight: 800;
+                        font-family: 'Courier New', monospace;
+                        color: #0f172a;
+                    }
+                    
+                    .print-blockchain-id {
+                        font-size: 14pt;
+                        font-weight: 700;
+                        color: #2563eb;
+                    }
+                    
+                    .print-node-timeline {
+                        margin: 20px 0;
+                    }
+                    
+                    .print-node-item {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 12px 15px;
+                        border: 1px solid #e2e8f0;
+                        border-radius: 8px;
+                        margin-bottom: 10px;
+                        background: white;
+                    }
+                    
+                    .print-node-info {
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                    }
+                    
+                    .print-node-icon {
+                        width: 35px;
+                        height: 35px;
+                        border-radius: 50%;
+                        background: #3D4B9C;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 16px;
+                    }
+                    
+                    .print-node-details h4 {
+                        font-size: 12pt;
+                        font-weight: 700;
+                        margin: 0 0 4px 0;
+                    }
+                    
+                    .print-node-meta {
+                        display: flex;
+                        gap: 8px;
+                        align-items: center;
+                        font-size: 9pt;
+                        color: #666;
+                    }
+                    
+                    .print-node-role {
+                        background: #f1f5f9;
+                        padding: 2px 6px;
+                        border-radius: 12px;
+                        font-weight: 700;
+                        text-transform: uppercase;
+                        color: #475569;
+                    }
+                    
+                    .print-node-status {
+                        text-align: right;
+                        font-size: 10pt;
+                    }
+                    
+                    .print-node-status strong {
+                        color: #16a34a;
+                        display: block;
+                        margin-bottom: 2px;
+                    }
+                    
+                    .print-blockchain-logs {
+                        background: #f8fafc;
+                        padding: 15px;
+                        border-radius: 8px;
+                        border: 1px solid #e2e8f0;
+                    }
+                    
+                    .print-log-item {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 8px 0;
+                        border-bottom: 1px solid #e2e8f0;
+                    }
+                    
+                    .print-log-item:last-child {
+                        border-bottom: none;
+                    }
+                    
+                    .print-log-event {
+                        font-size: 10pt;
+                        font-weight: 600;
+                    }
+                    
+                    .print-log-block {
+                        font-size: 9pt;
+                        color: #666;
+                        font-family: 'Courier New', monospace;
+                    }
+                    
+                    .print-footer {
+                        margin-top: 40px;
+                        padding: 15px;
+                        background: #f8fafc;
+                        border-radius: 8px;
+                        border: 1px solid #e2e8f0;
+                        text-align: center;
+                        font-size: 9pt;
+                        color: #64748b;
+                    }
+                    
+                    .print-footer strong {
+                        display: block;
+                        margin-bottom: 5px;
+                    }
+                    
+                    .print-watermark {
+                        position: fixed;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%) rotate(-45deg);
+                        font-size: 72pt;
+                        color: rgba(61, 75, 156, 0.1);
+                        font-weight: 800;
+                        z-index: -1;
+                        pointer-events: none;
+                    }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="print-watermark">निश्चित</div>
+            
+            <div class="print-header">
+                <h1>निश्चित - Claim Receipt</h1>
+                <p>Government of Nepal - Transparent Subsidy Distribution System</p>
+                <p>Official subsidy distribution record with blockchain verification</p>
+            </div>
+            
+            <div class="print-receipt-meta">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <div>
+                        <div class="print-info-label">RECEIPT ID</div>
+                        <div class="print-receipt-id">${receipt.receiptId || 'N/A'}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div class="print-info-label">BLOCKCHAIN ID</div>
+                        <div class="print-blockchain-id">#${receipt.itemId || 'N/A'}</div>
+                    </div>
+                </div>
+                <div style="font-size: 9pt; color: #666;">
+                    <strong>Verification Links:</strong>
+                    ${receipt.ipfsCid ? `IPFS: ${receipt.ipfsCid.substring(0, 15)}... | ` : ''}
+                    ${receipt.claimDetails?.claimTransactionHash ? `Transaction: ${receipt.claimDetails.claimTransactionHash.substring(0, 10)}...` : ''}
+                </div>
+            </div>
+            
+            <div class="print-section">
+                <h2>Beneficiary Information</h2>
+                <div class="print-grid">
+                    <div class="print-info-item">
+                        <div class="print-info-label">Name</div>
+                        <div class="print-info-value">${receipt.beneficiary?.name || producerSub?.name || 'N/A'}</div>
+                    </div>
+                    <div class="print-info-item">
+                        <div class="print-info-label">District</div>
+                        <div class="print-info-value">${receipt.beneficiary?.district || producerSub?.district || 'N/A'}</div>
+                    </div>
+                    <div class="print-info-item">
+                        <div class="print-info-label">Phone Number</div>
+                        <div class="print-info-value">${receipt.beneficiary?.phone || producerSub?.phone || 'N/A'}</div>
+                    </div>
+                    <div class="print-info-item">
+                        <div class="print-info-label">Application ID</div>
+                        <div class="print-info-value">${receipt.beneficiary?.applicationId || producerSub?.id || 'N/A'}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="print-section">
+                <h2>Claim Details</h2>
+                <div class="print-grid">
+                    <div class="print-info-item">
+                        <div class="print-info-label">Claim Date & Time</div>
+                        <div class="print-info-value">${receipt.claimDetails?.claimedAt ? 
+                            new Date(receipt.claimDetails.claimedAt).toLocaleString("en-US", {
+                                month: "short", day: "numeric", year: "numeric",
+                                hour: "2-digit", minute: "2-digit"
+                            }) : 'N/A'
+                        }</div>
+                    </div>
+                    <div class="print-info-item">
+                        <div class="print-info-label">Status</div>
+                        <div class="print-info-value">${receipt.claimDetails?.status || 'N/A'}</div>
+                    </div>
+                    <div class="print-info-item">
+                        <div class="print-info-label">Processing Stage</div>
+                        <div class="print-info-value">Stage ${receipt.claimDetails?.stage || 'N/A'} - Claimed</div>
+                    </div>
+                    <div class="print-info-item">
+                        <div class="print-info-label">Subsidy Type</div>
+                        <div class="print-info-value">Fertilizer Subsidy</div>
+                    </div>
+                </div>
+            </div>
+            
+            ${nodeHandovers.length > 0 ? `
+            <div class="print-section">
+                <h2>Processing Nodes & Handover History</h2>
+                <div class="print-node-timeline">
+                    ${nodeHandovers.map((node: any, index: number) => `
+                        <div class="print-node-item">
+                            <div class="print-node-info">
+                                <div class="print-node-icon" style="background: ${node.status === 'approved' ? '#1e8e3e' : '#3D4B9C'};">
+                                    ${node.nodeRole === 'producer' ? '🏛️' : node.nodeRole === 'transporter' ? '🚚' : '📍'}
+                                </div>
+                                <div class="print-node-details">
+                                    <h4>${node.nodeName}</h4>
+                                    <div class="print-node-meta">
+                                        <span class="print-node-role">${node.nodeRole}</span>
+                                        <span>${node.nodeDistrict}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="print-node-status">
+                                <strong>${node.status === 'approved' ? '✓ Verified' : '● Processing'}</strong>
+                                <div>Handover: ${new Date(node.handoverTime).toLocaleDateString()}</div>
+                                ${node.approvedAt ? `<div>Approved: ${new Date(node.approvedAt).toLocaleDateString()}</div>` : ''}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+            ` : ''}
+            
+            ${blockchainLogs.length > 0 ? `
+            <div class="print-section">
+                <h2>Blockchain Verification</h2>
+                <div class="print-blockchain-logs">
+                    <div style="font-size: 10pt; font-weight: 700; margin-bottom: 10px;">TRANSACTION EVENTS</div>
+                    ${blockchainLogs.map((log: any, index: number) => `
+                        <div class="print-log-item">
+                            <div>
+                                <div class="print-log-event">${log.eventName}</div>
+                                <div class="print-log-block">Block: ${log.blockNumber}</div>
+                            </div>
+                            <div style="font-size: 9pt; color: #2563eb; font-family: 'Courier New', monospace;">
+                                ${log.transactionHash.substring(0, 12)}...
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+            ` : ''}
+            
+            <div class="print-footer">
+                <strong>This receipt is cryptographically secured on blockchain</strong>
+                <div>Generated on ${receipt.metadata?.generatedAt ? 
+                    new Date(receipt.metadata.generatedAt).toLocaleString("en-US") : 
+                    new Date().toLocaleString("en-US")
+                }</div>
+                <div>System Version: ${receipt.metadata?.systemVersion || '1.0.0'}</div>
+                <div>निश्चित - Transparent Subsidy Distribution System</div>
+            </div>
+            
+            <script>
+                window.onload = function() {
+                    setTimeout(function() {
+                        window.print();
+                    }, 500);
+                }
+            </script>
+        </body>
+        </html>
+    `;
+    
+    return printContent;
+};
+
+// ---------------------------------------------------------------------------
 // Page
 // ---------------------------------------------------------------------------
 export default function BeneficiaryDashboardPage() {
@@ -444,7 +832,44 @@ export default function BeneficiaryDashboardPage() {
                                             </button>
                                             {producerSub?.status === "claimed" && (
                                                 <button
-                                                    onClick={() => window.print()}
+                                                    onClick={async () => {
+                                                        let currentReceiptData = receiptData;
+                                                        
+                                                        // If receipt data is not loaded, fetch it on demand
+                                                        if (!currentReceiptData && producerSub?.blockchain_itemId) {
+                                                            try {
+                                                                const params = new URLSearchParams();
+                                                                if (producerSub.receiptId) params.append('receiptId', producerSub.receiptId);
+                                                                if (producerSub.blockchain_itemId) params.append('itemId', producerSub.blockchain_itemId.toString());
+                                                                
+                                                                const res = await fetch(`/api/blockchain/receipt?${params}`);
+                                                                if (res.ok) {
+                                                                    const data = await res.json();
+                                                                    currentReceiptData = data.receipt;
+                                                                    setReceiptData(data.receipt); // Update state for future use
+                                                                }
+                                                            } catch (e) {
+                                                                console.error("Failed to load receipt data", e);
+                                                                alert('Failed to load receipt data. Please try again.');
+                                                                return;
+                                                            }
+                                                        }
+                                                        
+                                                        const printContent = createPrintableClaimReceipt(currentReceiptData, producerSub);
+                                                        if (!printContent) {
+                                                            alert('Receipt data is not available. Please try again in a moment.');
+                                                            return;
+                                                        }
+                                                        
+                                                        const printWindow = window.open('', '_blank', 'width=800,height=600,scrollbars=yes');
+                                                        if (!printWindow) {
+                                                            alert('Please allow popups to print the receipt');
+                                                            return;
+                                                        }
+                                                        
+                                                        printWindow.document.write(printContent);
+                                                        printWindow.document.close();
+                                                    }}
                                                     style={{ ...styles.cancelBtn, padding: "10px 24px" }}
                                                 >
                                                     Print Claim Receipt
@@ -897,6 +1322,19 @@ function ClaimReceiptView({ receiptData, producerSub, onPrint }: {
     producerSub: Submission | null | undefined; 
     onPrint: () => void;
 }) {
+    const handlePrintReceipt = () => {
+        const printContent = createPrintableClaimReceipt(receiptData, producerSub);
+        if (!printContent) return;
+        
+        const printWindow = window.open('', '_blank', 'width=800,height=600,scrollbars=yes');
+        if (!printWindow) {
+            alert('Please allow popups to print the receipt');
+            return;
+        }
+        
+        printWindow.document.write(printContent);
+        printWindow.document.close();
+    };
     if (!receiptData) {
         return (
             <section style={styles.card}>
@@ -925,7 +1363,8 @@ function ClaimReceiptView({ receiptData, producerSub, onPrint }: {
                     </p>
                 </div>
                 <button
-                    onClick={onPrint}
+                    onClick={handlePrintReceipt}
+                    data-enhanced-print="true"
                     style={{ ...styles.cancelBtn, padding: "10px 20px", background: "#f0fdf4", color: "#16a34a", borderColor: "#bbf7d0" }}
                 >
                     🖨️ Print Receipt
