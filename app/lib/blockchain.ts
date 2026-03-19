@@ -1,4 +1,5 @@
 import { ethers } from "ethers";
+import { MerkleProof, DocumentBatch } from "./merkle";
 
 // Simple in-memory nonce cache to prevent nonce conflicts
 const nonceCache = new Map<string, number>();
@@ -166,12 +167,23 @@ const ABI = [
     "function transporterSubmit(uint256 itemId, string ipfsHash) external",
     "function distributorSubmit(uint256 itemId, string ipfsHash) external",
     "function beneficiaryClaim(uint256 itemId) external",
-    "function getItem(uint256 itemId) external view returns (tuple(address beneficiary, uint8 stage, bool claimed, string currentIpfsHash))",
+    "function cancelItem(uint256 itemId) external",
+    "function getItem(uint256 itemId) external view returns (tuple(address beneficiary, uint8 stage, bool claimed, string currentIpfsHash, bytes32 itemId))",
+    "function getItemByBytes32(bytes32 itemId) external view returns (tuple(address beneficiary, uint8 stage, bool claimed, string currentIpfsHash, bytes32 itemId))",
     "function itemCount() external view returns (uint256)",
+    "function setMerkleRoot(uint256 itemId, uint8 stage, bytes32 merkleRoot) external",
+    "function verifyDocumentInclusion(uint256 itemId, uint8 stage, bytes32 documentHash, bytes32[] calldata proof) external view returns (bool)",
+    "function batchVerifyDocuments(uint256 itemId, uint8 stage, bytes32[] calldata documentHashes, bytes32[][] calldata proofs) external view returns (bool)",
+    "function getMerkleRoot(uint256 itemId, uint8 stage) external view returns (bytes32)",
+    "function getItemMerkleRoot(uint256 itemId) external view returns (bytes32)",
+    "event TransactionLogged(bytes32 indexed itemId, address indexed actor, string action)",
     "event ItemCreated(uint256 indexed itemId, address indexed beneficiary, string ipfsHash)",
     "event ItemVerified(uint256 indexed itemId, uint8 newStage)",
     "event DocumentUploaded(uint256 indexed itemId, uint8 stage, string ipfsHash, address uploader)",
-    "event SubsidyClaimed(uint256 indexed itemId, address indexed beneficiary, address claimedBy)"
+    "event MerkleRootSet(uint256 indexed itemId, uint8 indexed stage, bytes32 merkleRoot)",
+    "event DocumentBatchVerified(uint256 indexed itemId, uint8 indexed stage, bytes32 merkleRoot)",
+    "event SubsidyClaimed(uint256 indexed itemId, address indexed beneficiary, address claimedBy)",
+    "event ItemCancelled(uint256 indexed itemId)"
 ];
 
 const provider = new ethers.JsonRpcProvider(process.env.BLOCKCHAIN_RPC_URL || "http://127.0.0.1:8545");
@@ -223,3 +235,369 @@ export async function sendTransactionWithNonce(
 export const ADMIN_KEY = process.env.ADMIN_PRIVATE_KEY!;
 export const TRANSPORTER_KEY = process.env.TRANSPORTER_PRIVATE_KEY!;
 export const DISTRIBUTOR_KEY = process.env.DISTRIBUTOR_PRIVATE_KEY!;
+
+// ---------------- FRONTEND BLOCKCHAIN CONNECTION ----------------
+
+export class BlockchainConnection {
+    private provider: ethers.BrowserProvider | null = null;
+    private signer: ethers.JsonRpcSigner | null = null;
+    private contract: ethers.Contract | null = null;
+    private contractAddress: string;
+    private isConnecting = false;
+
+    constructor(contractAddress: string) {
+        this.contractAddress = contractAddress;
+    }
+
+    async connect(): Promise<{ address: string; success: boolean }> {
+        if (this.isConnecting) {
+            throw new Error('Connection already in progress');
+        }
+
+        if (!window.ethereum) {
+            throw new Error('MetaMask is not installed');
+        }
+
+        this.isConnecting = true;
+
+        try {
+            // Create provider and signer
+            this.provider = new ethers.BrowserProvider(window.ethereum);
+            await this.provider.send('eth_requestAccounts', []);
+            this.signer = await this.provider.getSigner();
+
+            // Create contract instance
+            this.contract = new ethers.Contract(
+                this.contractAddress,
+                ABI,
+                this.signer
+            );
+
+            const address = await this.signer.getAddress();
+            return { address, success: true };
+        } catch (error) {
+            console.error('Blockchain connection failed:', error);
+            throw error;
+        } finally {
+            this.isConnecting = false;
+        }
+    }
+
+    async disconnect(): Promise<void> {
+        this.provider = null;
+        this.signer = null;
+        this.contract = null;
+    }
+
+    isConnected(): boolean {
+        return this.signer !== null && this.contract !== null;
+    }
+
+    async getSignerAddress(): Promise<string> {
+        if (!this.signer) {
+            throw new Error('Not connected to blockchain');
+        }
+        return await this.signer.getAddress();
+    }
+
+    async waitForTransaction(txHash: string): Promise<ethers.TransactionReceipt> {
+        if (!this.provider) {
+            throw new Error('Provider not available');
+        }
+        const receipt = await this.provider.waitForTransaction(txHash);
+        if (!receipt) {
+            throw new Error('Transaction receipt not found');
+        }
+        return receipt;
+    }
+
+    // Contract methods with error handling
+    async createItem(beneficiary: string, ipfsHash: string): Promise<ethers.TransactionResponse> {
+        if (!this.contract) {
+            throw new Error('Contract not initialized');
+        }
+
+        try {
+            const tx = await this.contract.createItem(beneficiary, ipfsHash);
+            return tx;
+        } catch (error: any) {
+            if (error.code === 4001) {
+                throw new Error('User rejected transaction');
+            } else if (error.code === -32603) {
+                throw new Error('Out of gas or internal error');
+            }
+            throw error;
+        }
+    }
+
+    async adminVerify(itemId: number, expectedStage: number): Promise<ethers.TransactionResponse> {
+        if (!this.contract) {
+            throw new Error('Contract not initialized');
+        }
+
+        try {
+            const tx = await this.contract.adminVerify(itemId, expectedStage);
+            return tx;
+        } catch (error: any) {
+            if (error.code === 4001) {
+                throw new Error('User rejected transaction');
+            }
+            throw error;
+        }
+    }
+
+    async transporterSubmit(itemId: number, ipfsHash: string): Promise<ethers.TransactionResponse> {
+        if (!this.contract) {
+            throw new Error('Contract not initialized');
+        }
+
+        try {
+            const tx = await this.contract.transporterSubmit(itemId, ipfsHash);
+            return tx;
+        } catch (error: any) {
+            if (error.code === 4001) {
+                throw new Error('User rejected transaction');
+            }
+            throw error;
+        }
+    }
+
+    async distributorSubmit(itemId: number, ipfsHash: string): Promise<ethers.TransactionResponse> {
+        if (!this.contract) {
+            throw new Error('Contract not initialized');
+        }
+
+        try {
+            const tx = await this.contract.distributorSubmit(itemId, ipfsHash);
+            return tx;
+        } catch (error: any) {
+            if (error.code === 4001) {
+                throw new Error('User rejected transaction');
+            }
+            throw error;
+        }
+    }
+
+    async beneficiaryClaim(itemId: number): Promise<ethers.TransactionResponse> {
+        if (!this.contract) {
+            throw new Error('Contract not initialized');
+        }
+
+        try {
+            const tx = await this.contract.beneficiaryClaim(itemId);
+            return tx;
+        } catch (error: any) {
+            if (error.code === 4001) {
+                throw new Error('User rejected transaction');
+            }
+            throw error;
+        }
+    }
+
+    async cancelItem(itemId: number): Promise<ethers.TransactionResponse> {
+        if (!this.contract) {
+            throw new Error('Contract not initialized');
+        }
+
+        try {
+            const tx = await this.contract.cancelItem(itemId);
+            return tx;
+        } catch (error: any) {
+            if (error.code === 4001) {
+                throw new Error('User rejected transaction');
+            }
+            throw error;
+        }
+    }
+
+    async getItem(itemId: number): Promise<any> {
+        if (!this.contract) {
+            throw new Error('Contract not initialized');
+        }
+        return await this.contract.getItem(itemId);
+    }
+
+    async getItemByBytes32(itemId: string): Promise<any> {
+        if (!this.contract) {
+            throw new Error('Contract not initialized');
+        }
+        return await this.contract.getItemByBytes32(itemId);
+    }
+
+    async getItemCount(): Promise<number> {
+        if (!this.contract) {
+            throw new Error('Contract not initialized');
+        }
+        const count = await this.contract.itemCount();
+        return Number(count);
+    }
+
+    // Event listener for TransactionLogged events
+    async listenToTransactionLogs(
+        callback: (itemId: string, actor: string, action: string, event: any) => void
+    ): Promise<void> {
+        if (!this.contract) {
+            throw new Error('Contract not initialized');
+        }
+
+        this.contract.on('TransactionLogged', (itemId, actor, action, event) => {
+            callback(itemId, actor, action, event);
+        });
+    }
+
+    // Stop listening to events
+    stopListening(): void {
+        if (this.contract) {
+            this.contract.removeAllListeners('TransactionLogged');
+        }
+    }
+
+    // Get recent transactions from the contract
+    async getRecentTransactions(limit: number = 10): Promise<any[]> {
+        if (!this.provider || !this.contract) {
+            throw new Error('Provider or contract not initialized');
+        }
+
+        try {
+            // Get the latest block number
+            const latestBlock = await this.provider.getBlockNumber();
+            const transactions = [];
+
+            // Query events from recent blocks
+            const filter = this.contract.filters.TransactionLogged();
+            const events = await this.contract.queryFilter(filter, latestBlock - 1000, latestBlock);
+
+            // Process and limit results
+            for (let i = events.length - 1; i >= Math.max(0, events.length - limit); i--) {
+                const event = events[i];
+                if ('args' in event) {
+                    const eventLog = event as ethers.EventLog;
+                    transactions.push({
+                        itemId: eventLog.args.itemId,
+                        actor: eventLog.args.actor,
+                        action: eventLog.args.action,
+                        blockNumber: eventLog.blockNumber,
+                        transactionHash: eventLog.transactionHash,
+                        timestamp: new Date().toISOString() // Would need to fetch block timestamp for accuracy
+                    });
+                }
+            }
+
+            return transactions;
+        } catch (error) {
+            console.error('Failed to fetch recent transactions:', error);
+            return [];
+        }
+    }
+}
+
+// Global instance
+let blockchainInstance: BlockchainConnection | null = null;
+
+export function getBlockchainConnection(contractAddress: string): BlockchainConnection {
+    if (!blockchainInstance) {
+        blockchainInstance = new BlockchainConnection(contractAddress);
+    }
+    return blockchainInstance;
+}
+
+// Type declarations for window.ethereum
+declare global {
+    interface Window {
+        ethereum?: any;
+    }
+}
+
+// ---------------- MERKLE TREE BLOCKCHAIN FUNCTIONS ----------------
+
+/**
+ * Set Merkle root for document batch at specific stage
+ */
+export async function setMerkleRoot(
+    contract: ethers.Contract,
+    itemId: number,
+    stage: Stage,
+    merkleRoot: string
+): Promise<ethers.TransactionReceipt> {
+    return await sendTransactionWithNonce(contract, 'setMerkleRoot', [itemId, stage, merkleRoot]);
+}
+
+/**
+ * Verify document inclusion using Merkle proof
+ */
+export async function verifyDocumentInclusion(
+    contract: ethers.Contract,
+    itemId: number,
+    stage: Stage,
+    documentHash: string,
+    proof: string[]
+): Promise<boolean> {
+    return await contract.verifyDocumentInclusion(itemId, stage, documentHash, proof);
+}
+
+/**
+ * Batch verify multiple documents
+ */
+export async function batchVerifyDocuments(
+    contract: ethers.Contract,
+    itemId: number,
+    stage: Stage,
+    documentHashes: string[],
+    proofs: string[][]
+): Promise<boolean> {
+    return await contract.batchVerifyDocuments(itemId, stage, documentHashes, proofs);
+}
+
+/**
+ * Get Merkle root for specific item and stage
+ */
+export async function getMerkleRoot(
+    contract: ethers.Contract,
+    itemId: number,
+    stage: Stage
+): Promise<string> {
+    return await contract.getMerkleRoot(itemId, stage);
+}
+
+/**
+ * Get overall Merkle root for an item
+ */
+export async function getItemMerkleRoot(
+    contract: ethers.Contract,
+    itemId: number
+): Promise<string> {
+    return await contract.getItemMerkleRoot(itemId);
+}
+
+/**
+ * Submit documents with Merkle tree batch
+ */
+export async function submitDocumentBatch(
+    contract: ethers.Contract,
+    itemId: number,
+    documents: string[],
+    submitFunction: 'transporterSubmit' | 'distributorSubmit'
+): Promise<{ receipt: ethers.TransactionReceipt; merkleRoot: string; proofs: string[][] }> {
+    const { createDocumentBatch } = await import('./merkle');
+    
+    // Create Merkle tree
+    const documentBatch = createDocumentBatch(documents);
+    
+    // Submit primary document (first one)
+    const receipt = await sendTransactionWithNonce(contract, submitFunction, [itemId, documents[0]]);
+    
+    // Set Merkle root
+    await setMerkleRoot(contract, itemId, 
+        submitFunction === 'transporterSubmit' ? Stage.TransporterReady : Stage.DistributorReady,
+        documentBatch.merkleRoot
+    );
+    
+    // Extract proofs for all documents
+    const proofs: string[][] = documents.map(doc => documentBatch.proofs[doc] || []);
+    
+    return {
+        receipt,
+        merkleRoot: documentBatch.merkleRoot,
+        proofs
+    };
+}

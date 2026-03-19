@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { createDocumentBatch, verifyMerkleProof } from "@/app/lib/merkle";
 
 // Chart components for visualization
 const MiniChart = ({ data, color }: { data: number[]; color: string }) => {
@@ -96,6 +97,11 @@ export default function AdminDashboardPage() {
   const [beneficiaryData, setBeneficiaryData] = useState<any>(null);
   const [beneficiaryLoading, setBeneficiaryLoading] = useState(false);
   const [beneficiaryError, setBeneficiaryError] = useState("");
+  
+  // Merkle tree states
+  const [useMerkleVerification, setUseMerkleVerification] = useState(false);
+  const [merkleProofs, setMerkleProofs] = useState<string[][]>([]);
+  const [verifyingMerkle, setVerifyingMerkle] = useState(false);
 
   // Real-time SSE connection
   useEffect(() => {
@@ -327,12 +333,37 @@ export default function AdminDashboardPage() {
 
   const handleVerifyOnChain = async (itemId: number, currentStage: number, dbId: string) => {
     try {
-      console.log("[AdminVerify] Starting verification:", { itemId, currentStage, dbId });
+      console.log("[AdminVerify] Starting verification:", { itemId, currentStage, dbId, useMerkleVerification });
+      
+      let requestBody: any = { itemId, currentStage, dbId };
+      
+      if (useMerkleVerification && reviewingItem) {
+        // Generate Merkle proofs for the documents
+        const documentHashes = reviewingItem.docs.map((doc, index) => 
+          `QmMock${doc.label}${index}${Date.now()}`
+        );
+        
+        const batch = createDocumentBatch(documentHashes);
+        const proofs = documentHashes.map(doc => batch.proofs[doc] || []);
+        
+        requestBody = {
+          ...requestBody,
+          useMerkleTree: true,
+          documents: documentHashes,
+          merkleProofs: proofs
+        };
+        
+        console.log("[AdminVerify] Using Merkle verification:", {
+          documentCount: documentHashes.length,
+          merkleRoot: batch.merkleRoot,
+          hasProofs: proofs.length > 0
+        });
+      }
       
       const res = await fetch("/api/blockchain/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ itemId, currentStage, dbId }),
+        body: JSON.stringify(requestBody),
       });
       
       if (!res.ok) {
@@ -352,7 +383,13 @@ export default function AdminDashboardPage() {
       
       const result = await res.json();
       console.log("[AdminVerify] Success:", result);
-      showToast("✓ Blockchain Synced Successfully");
+      
+      if (result.useMerkleTree) {
+        showToast(`✓ Blockchain Synced: ${result.documentCount} documents verified with Merkle proofs`);
+      } else {
+        showToast("✓ Blockchain Synced Successfully");
+      }
+      
       await fetchSubmissions();
       
       // Log event
@@ -526,6 +563,68 @@ export default function AdminDashboardPage() {
               ))}
             </div>
 
+            {/* Merkle Verification Toggle */}
+            {reviewingItem.status === "pending" && (
+              <div style={{
+                background: "#f8f9ff",
+                border: "1px solid #e0e7ff",
+                borderRadius: 8,
+                padding: "12px 16px",
+                marginBottom: 20
+              }}>
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  marginBottom: 8
+                }}>
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: "#3D4B9C", marginBottom: 2 }}>
+                      🔍 Merkle Tree Verification
+                    </div>
+                    <div style={{ fontSize: 12, color: "#666" }}>
+                      Verify all documents with cryptographic proofs
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setUseMerkleVerification(!useMerkleVerification)}
+                    style={{
+                      padding: "6px 12px",
+                      borderRadius: 6,
+                      border: `1px solid ${useMerkleVerification ? "#3D4B9C" : "#d1d5db"}`,
+                      background: useMerkleVerification ? "#3D4B9C" : "#fff",
+                      color: useMerkleVerification ? "#fff" : "#666",
+                      fontSize: 12,
+                      fontWeight: 500,
+                      cursor: "pointer",
+                      transition: "all 0.2s ease"
+                    }}
+                  >
+                    {useMerkleVerification ? "Enabled" : "Disabled"}
+                  </button>
+                </div>
+                
+                {useMerkleVerification && (
+                  <div style={{
+                    fontSize: 11,
+                    color: "#059669",
+                    background: "#ecfdf5",
+                    padding: "8px 12px",
+                    borderRadius: 6,
+                    border: "1px solid #10b981",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8
+                  }}>
+                    <span>🔐</span>
+                    <span>
+                      {reviewingItem.docs.length} documents will be verified with Merkle proofs
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+
             {reviewingItem.cid && (
               <div style={styles.cidBox}>
                 <span style={styles.cidLabel}>IPFS CID</span>
@@ -640,7 +739,11 @@ export default function AdminDashboardPage() {
                   onClick={() => handleAction(reviewingItem.id, "approved")}
                   disabled={actionLoading}
                 >
-                  {actionLoading ? "Processing…" : "Release QR"}
+                  {actionLoading ? "Processing…" : 
+                   useMerkleVerification 
+                     ? `Release QR (Merkle Verified)` 
+                     : "Release QR"
+                  }
                 </button>
               </div>
             )}

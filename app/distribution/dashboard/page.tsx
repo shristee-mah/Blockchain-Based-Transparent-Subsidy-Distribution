@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import QRScanner from "@/app/components/QRScanner";
+import { createDocumentBatch, getMerkleRoot } from "@/app/lib/merkle";
 
 type Submission = {
   id: string;
@@ -295,6 +296,12 @@ export default function DistributorDashboardPage() {
   const [scannedItemId, setScannedItemId] = useState<number | null>(null);
   const [scannedCID, setScannedCID] = useState<string>("");
   const [isVerified, setIsVerified] = useState(false);
+  
+  // Merkle tree states
+  const [useMerkleTree, setUseMerkleTree] = useState(false);
+  const [merkleRoot, setMerkleRoot] = useState<string>("");
+  const [documentHashes, setDocumentHashes] = useState<string[]>([]);
+  const [isGeneratingMerkle, setIsGeneratingMerkle] = useState(false);
 
   useEffect(() => {
     if (!toast.show) return;

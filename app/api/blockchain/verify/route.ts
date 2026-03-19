@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import { getContract, ADMIN_KEY, Stage, decodeBlockchainError, sendTransactionWithNonce } from "@/app/lib/blockchain";
+import { verifyMerkleProof, createDocumentBatch } from "@/app/lib/merkle";
 import dbPool from "@/app/lib/db";
 
 export type Submission = {
@@ -38,10 +39,14 @@ function write(data: Submission[]): void {
 
 export async function POST(request: Request) {
     try {
-        const { itemId, currentStage, dbId } = await request.json();
+        const { itemId, currentStage, dbId, documents, useMerkleTree, merkleProofs } = await request.json();
 
         if (itemId === undefined || currentStage === undefined) {
             return NextResponse.json({ error: "Missing itemId or currentStage" }, { status: 400 });
+        }
+
+        if (useMerkleTree && (!documents || !merkleProofs)) {
+            return NextResponse.json({ error: "Documents and merkleProofs required for Merkle tree verification" }, { status: 400 });
         }
 
         let resolvedItemId = itemId;
@@ -50,7 +55,7 @@ export async function POST(request: Request) {
         const submissions = read();
         const submission = submissions.find(s => s.id === dbId);
         
-        console.log(`[AdminVerify] Processing: dbId=${dbId}, itemId=${itemId}, stage=${currentStage}`);
+        console.log(`[AdminVerify] Processing: dbId=${dbId}, itemId=${itemId}, stage=${currentStage}, useMerkleTree=${useMerkleTree}`);
 
         const contract = getContract(ADMIN_KEY);
         let receipt;
@@ -112,6 +117,13 @@ export async function POST(request: Request) {
                 receipt = await sendTransactionWithNonce(contract, 'adminVerify', [resolvedItemId, currentStage]);
                 console.log(`[AdminVerify] Item ${resolvedItemId} verified`);
 
+                // If using Merkle tree, set the Merkle root for this stage
+                if (useMerkleTree && documents) {
+                    const documentBatch = createDocumentBatch(documents);
+                    await sendTransactionWithNonce(contract, 'setMerkleRoot', [resolvedItemId, currentStage, documentBatch.merkleRoot]);
+                    console.log(`[AdminVerify] Merkle root set for stage ${currentStage}: ${documentBatch.merkleRoot}`);
+                }
+
             } catch (error: any) {
                 console.error("[AdminVerify] Contract error:", error.message);
                 throw new Error(`Blockchain operation failed: ${error.message}`);
@@ -121,6 +133,30 @@ export async function POST(request: Request) {
             try {
                 receipt = await sendTransactionWithNonce(contract, 'adminVerify', [resolvedItemId, currentStage]);
                 console.log(`[AdminVerify] Item ${resolvedItemId} verified from Stage ${currentStage}`);
+                
+                // If using Merkle tree, verify documents and set Merkle root
+                if (useMerkleTree && documents && merkleProofs) {
+                    // Verify all documents using their proofs
+                    const documentBatch = createDocumentBatch(documents);
+                    
+                    // Verify each document against its proof
+                    let allValid = true;
+                    for (let i = 0; i < documents.length; i++) {
+                        const isValid = verifyMerkleProof(documents[i], merkleProofs[i], documentBatch.merkleRoot);
+                        if (!isValid) {
+                            console.error(`[AdminVerify] Document ${i} verification failed`);
+                            allValid = false;
+                            break;
+                        }
+                    }
+                    
+                    if (allValid) {
+                        await sendTransactionWithNonce(contract, 'setMerkleRoot', [resolvedItemId, currentStage, documentBatch.merkleRoot]);
+                        console.log(`[AdminVerify] Merkle root set for stage ${currentStage}: ${documentBatch.merkleRoot}`);
+                    } else {
+                        throw new Error("Merkle proof verification failed");
+                    }
+                }
             } catch (error: any) {
                 console.error("[AdminVerify] Verification error:", error.message);
                 throw new Error(`Verification failed: ${error.message}`);
@@ -188,7 +224,10 @@ export async function POST(request: Request) {
             success: true,
             transactionHash: receipt.hash,
             itemId: Number(resolvedItemId),
-            newStage
+            newStage,
+            useMerkleTree: !!useMerkleTree,
+            documentCount: useMerkleTree ? documents?.length : 0,
+            merkleVerified: useMerkleTree ? true : undefined
         });
 
     } catch (error: any) {

@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import QRScanner from "@/app/components/QRScanner";
+import { createDocumentBatch, getMerkleRoot } from "@/app/lib/merkle";
 
 type Submission = {
   id: string;
@@ -230,6 +231,12 @@ export default function TransporterDashboardPage() {
   const [scannedItemId, setScannedItemId] = useState<number | null>(null);
   const [scannedCID, setScannedCID] = useState<string>("");
   const [isVerified, setIsVerified] = useState(false);
+  
+  // Merkle tree states
+  const [useMerkleTree, setUseMerkleTree] = useState(false);
+  const [merkleRoot, setMerkleRoot] = useState<string>("");
+  const [documentHashes, setDocumentHashes] = useState<string[]>([]);
+  const [isGeneratingMerkle, setIsGeneratingMerkle] = useState(false);
 
   useEffect(() => {
     if (!toast.show) return;
@@ -298,6 +305,43 @@ export default function TransporterDashboardPage() {
   const removeFile = (index: number) =>
     setFiles((prev) => prev.filter((_, i) => i !== index));
 
+  // Generate Merkle tree when files change and Merkle mode is enabled
+  const generateMerkleTree = useCallback(async () => {
+    if (!useMerkleTree || files.length === 0) {
+      setMerkleRoot("");
+      setDocumentHashes([]);
+      return;
+    }
+
+    setIsGeneratingMerkle(true);
+    try {
+      // Create mock document hashes (in real app, these would be IPFS hashes)
+      const mockHashes = files.map((file, index) => 
+        `QmMock${file.label}${index}${Date.now()}`
+      );
+      
+      const batch = createDocumentBatch(mockHashes);
+      setMerkleRoot(batch.merkleRoot);
+      setDocumentHashes(mockHashes);
+      
+      console.log("[Merkle] Generated tree:", {
+        documentCount: mockHashes.length,
+        root: batch.merkleRoot,
+        documents: mockHashes
+      });
+    } catch (error) {
+      console.error("[Merkle] Generation failed:", error);
+      showToast("Failed to generate Merkle tree", "error");
+    } finally {
+      setIsGeneratingMerkle(false);
+    }
+  }, [files, useMerkleTree]);
+
+  // Auto-generate Merkle tree when files change
+  useEffect(() => {
+    generateMerkleTree();
+  }, [generateMerkleTree]);
+
   // const handleSubmit = async () => {
   //   if (files.length === 0 || !transporterName || !district) {
   //     showToast(
@@ -317,12 +361,9 @@ export default function TransporterDashboardPage() {
   //     const res = await fetch("/api/submissions", {
   //       method: "POST",
   //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify(payload),
-  //     });
-
   const handleSubmit = async () => {
     if (!isVerified) {
-      showToast("Verification Required: Please scan the handover QR code first.", "error");
+      showToast("Verification Required: Please scan handover QR code first.", "error");
       return;
     }
 
@@ -348,18 +389,36 @@ export default function TransporterDashboardPage() {
       if (!res.ok) throw new Error("Local submission failed");
       const subData = await res.json();
 
-      // 2. Submit to Blockchain (TransporterAction)
+      // 2. Submit to Blockchain with Merkle tree support
       if (scannedItemId !== null) {
         showToast("Documents uploaded. Sending to blockchain...");
         try {
+          let bcBody: any = {
+            itemId: scannedItemId,
+            dbId: subData.id
+          };
+
+          if (useMerkleTree && files.length > 1) {
+            // Use Merkle tree batch submission
+            bcBody = {
+              ...bcBody,
+              useMerkleTree: true,
+              documents: documentHashes
+            };
+            console.log("[Blockchain] Submitting with Merkle tree:", {
+              documentCount: documentHashes.length,
+              merkleRoot
+            });
+          } else {
+            // Single document submission
+            bcBody.CID = subData.cid || "QmError";
+            console.log("[Blockchain] Submitting single document");
+          }
+
           const bcRes = await fetch("/api/blockchain/transport", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              itemId: scannedItemId,
-              CID: subData.cid || "QmError",
-              dbId: subData.id
-            }),
+            body: JSON.stringify(bcBody),
           });
           
           if (!bcRes.ok) {
@@ -397,9 +456,14 @@ export default function TransporterDashboardPage() {
           }
           
           const bcResult = await bcRes.json();
-          showToast("✓ Blockchain Synced: Status moved to TransporterReady");
           
-          // Fire-and-forget: log the event for this item
+          if (bcResult.useMerkleTree) {
+            showToast(`✓ Blockchain Synced: ${bcResult.documentCount} documents batched with Merkle tree`);
+          } else {
+            showToast("✓ Blockchain Synced: Status moved to TransporterReady");
+          }
+          
+          // Fire-and-forget: log event for this item
           fetch("/api/blockchain/logEvent", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -416,12 +480,16 @@ export default function TransporterDashboardPage() {
         showToast("Documents submitted. (Warning: No blockchain ID linked)");
       }
 
+      // Reset form
       setFiles([]);
       setTransporterName("");
       setDistrict("");
       setScannedItemId(null);
       setScannedCID("");
       setIsVerified(false);
+      setUseMerkleTree(false);
+      setMerkleRoot("");
+      setDocumentHashes([]);
       fetchMyDocs();
       showToast("✓ Handover Logged Successfully", "success");
     } catch (err: any) {
@@ -608,6 +676,87 @@ export default function TransporterDashboardPage() {
                 onChange={(e) => setDistrict(e.target.value)}
                 style={styles.input}
               />
+              
+              {/* Merkle Tree Toggle */}
+              <div style={{
+                background: "#f8f9ff",
+                border: "1px solid #e0e7ff",
+                borderRadius: 8,
+                padding: "12px 16px",
+                marginBottom: 16
+              }}>
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  marginBottom: 8
+                }}>
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: "#3D4B9C", marginBottom: 2 }}>
+                      🌳 Merkle Tree Batch Mode
+                    </div>
+                    <div style={{ fontSize: 12, color: "#666" }}>
+                      Batch multiple documents for efficient blockchain submission
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setUseMerkleTree(!useMerkleTree)}
+                    style={{
+                      padding: "6px 12px",
+                      borderRadius: 6,
+                      border: `1px solid ${useMerkleTree ? "#3D4B9C" : "#d1d5db"}`,
+                      background: useMerkleTree ? "#3D4B9C" : "#fff",
+                      color: useMerkleTree ? "#fff" : "#666",
+                      fontSize: 12,
+                      fontWeight: 500,
+                      cursor: "pointer",
+                      transition: "all 0.2s ease"
+                    }}
+                  >
+                    {useMerkleTree ? "Enabled" : "Disabled"}
+                  </button>
+                </div>
+                
+                {useMerkleTree && (
+                  <div style={{
+                    fontSize: 11,
+                    color: "#059669",
+                    background: "#ecfdf5",
+                    padding: "8px 12px",
+                    borderRadius: 6,
+                    border: "1px solid #10b981",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8
+                  }}>
+                    <span>✓</span>
+                    <span>
+                      {files.length > 1 
+                        ? `${files.length} documents will be batched into a single Merkle tree`
+                        : files.length === 1 
+                          ? "Add more documents to enable batch mode"
+                          : "Attach documents to create Merkle tree"
+                      }
+                    </span>
+                  </div>
+                )}
+                
+                {useMerkleTree && merkleRoot && (
+                  <div style={{
+                    fontSize: 10,
+                    color: "#3D4B9C",
+                    background: "#f0f4ff",
+                    padding: "8px 12px",
+                    borderRadius: 6,
+                    border: "1px solid #3D4B9C",
+                    fontFamily: "monospace",
+                    wordBreak: "break-all"
+                  }}>
+                    <div style={{ fontWeight: 600, marginBottom: 4 }}>Merkle Root:</div>
+                    {merkleRoot}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div
@@ -750,7 +899,11 @@ export default function TransporterDashboardPage() {
                 onClick={handleSubmit}
                 disabled={isSubmitting || !isVerified}
               >
-                {isSubmitting ? "Submitting..." : "Submit Handover Proof"}
+                {isSubmitting ? "Submitting..." : 
+                 useMerkleTree && files.length > 1 
+                   ? `Submit ${files.length} Documents (Merkle Batch)`
+                   : "Submit Handover Proof"
+                }
               </button>
               <button
                 style={styles.secondary}
@@ -758,6 +911,9 @@ export default function TransporterDashboardPage() {
                   setFiles([]);
                   setTransporterName("");
                   setDistrict("");
+                  setUseMerkleTree(false);
+                  setMerkleRoot("");
+                  setDocumentHashes([]);
                   setActiveView("overview");
                 }}
               >

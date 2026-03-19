@@ -2,6 +2,7 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 contract TransparentSubsidySystem is AccessControl {
     // ---------------- ROLES ----------------
@@ -27,11 +28,17 @@ contract TransparentSubsidySystem is AccessControl {
         address beneficiary;
         Stage stage;
         bool claimed;
-        string currentIpfsHash; 
+        string currentIpfsHash;
+        bytes32 itemId; // Unique bytes32 ID for blockchain tracking
     }
 
     uint256 public itemCount;
     mapping(uint256 => Item) public items;
+    mapping(bytes32 => uint256) public itemIdToUint; // bytes32 to uint256 mapping
+    
+    // Merkle tree storage for document batches
+    mapping(uint256 => bytes32) public itemMerkleRoots; // itemId -> merkle root
+    mapping(uint256 => mapping(Stage => bytes32)) public stageMerkleRoots; // itemId -> stage -> merkle root
 
     struct Document {
         Stage stage;
@@ -42,9 +49,12 @@ contract TransparentSubsidySystem is AccessControl {
     mapping(uint256 => Document[]) private itemDocuments;
 
     // ---------------- EVENTS ----------------
+    event TransactionLogged(bytes32 indexed itemId, address indexed actor, string action);
     event ItemCreated(uint256 indexed itemId, address indexed beneficiary, string ipfsHash);
     event ItemVerified(uint256 indexed itemId, Stage newStage);
     event DocumentUploaded(uint256 indexed itemId, Stage stage, string ipfsHash, address uploader);
+    event MerkleRootSet(uint256 indexed itemId, Stage indexed stage, bytes32 merkleRoot);
+    event DocumentBatchVerified(uint256 indexed itemId, Stage indexed stage, bytes32 merkleRoot);
     event SubsidyClaimed(uint256 indexed itemId, address indexed beneficiary, address claimedBy);
     event ItemCancelled(uint256 indexed itemId);
 
@@ -66,12 +76,20 @@ contract TransparentSubsidySystem is AccessControl {
     {
         require(beneficiary != address(0), "Invalid beneficiary");
         itemCount++;
+        
+        // Generate unique bytes32 Item ID
+        bytes32 uniqueItemId = keccak256(abi.encodePacked(block.timestamp, msg.sender, itemCount));
+        
         items[itemCount] = Item({
             beneficiary: beneficiary,
             stage: Stage.Created,
             claimed: false,
-            currentIpfsHash: ipfsHash
+            currentIpfsHash: ipfsHash,
+            itemId: uniqueItemId
         });
+        
+        // Map bytes32 ID to uint256
+        itemIdToUint[uniqueItemId] = itemCount;
 
         itemDocuments[itemCount].push(Document({
             stage: Stage.Created,
@@ -80,6 +98,7 @@ contract TransparentSubsidySystem is AccessControl {
             timestamp: block.timestamp
         }));
 
+        emit TransactionLogged(uniqueItemId, msg.sender, "CREATE_ITEM");
         emit ItemCreated(itemCount, beneficiary, ipfsHash);
         emit DocumentUploaded(itemCount, Stage.Created, ipfsHash, msg.sender);
     }
@@ -102,6 +121,7 @@ contract TransparentSubsidySystem is AccessControl {
             revert("This stage cannot be verified by Admin directly");
         }
 
+        emit TransactionLogged(item.itemId, msg.sender, "ADMIN_VERIFY");
         emit ItemVerified(itemId, item.stage);
     }
 
@@ -123,6 +143,7 @@ contract TransparentSubsidySystem is AccessControl {
             timestamp: block.timestamp
         }));
 
+        emit TransactionLogged(item.itemId, msg.sender, "TRANSPORTER_SUBMIT");
         emit DocumentUploaded(itemId, Stage.TransporterReady, ipfsHash, msg.sender);
     }
 
@@ -144,6 +165,7 @@ contract TransparentSubsidySystem is AccessControl {
             timestamp: block.timestamp
         }));
 
+        emit TransactionLogged(item.itemId, msg.sender, "DISTRIBUTOR_SUBMIT");
         emit DocumentUploaded(itemId, Stage.DistributorReady, ipfsHash, msg.sender);
     }
 
@@ -161,6 +183,7 @@ contract TransparentSubsidySystem is AccessControl {
         item.claimed = true;
         item.stage = Stage.Claimed;
 
+        emit TransactionLogged(item.itemId, msg.sender, "BENEFICIARY_CLAIM");
         emit SubsidyClaimed(itemId, item.beneficiary, msg.sender);
         emit DocumentUploaded(itemId, Stage.Claimed, "ipfs://Claimed", msg.sender);
     }
@@ -172,6 +195,8 @@ contract TransparentSubsidySystem is AccessControl {
         Item storage item = items[itemId];
         require(!item.claimed, "Cannot cancel a claimed item");
         item.stage = Stage.Cancelled;
+        
+        emit TransactionLogged(item.itemId, msg.sender, "CANCEL_ITEM");
         emit ItemCancelled(itemId);
     }
 
@@ -187,5 +212,95 @@ contract TransparentSubsidySystem is AccessControl {
 
     function getItem(uint256 itemId) external view returns (Item memory) {
         return items[itemId];
+    }
+    
+    function getItemByBytes32(bytes32 itemId) external view returns (Item memory) {
+        uint256 uintId = itemIdToUint[itemId];
+        require(uintId != 0, "Item not found");
+        return items[uintId];
+    }
+    
+    // ---------------- MERKLE TREE FUNCTIONS ----------------
+    
+    /**
+     * @dev Set Merkle root for document batch at specific stage
+     * @param itemId The subsidy item ID
+     * @param stage The workflow stage
+     * @param merkleRoot The Merkle root of document batch
+     */
+    function setMerkleRoot(uint256 itemId, Stage stage, bytes32 merkleRoot)
+        external
+        onlyRole(ADMIN_ROLE)
+    {
+        require(items[itemId].beneficiary != address(0), "Item does not exist");
+        stageMerkleRoots[itemId][stage] = merkleRoot;
+        itemMerkleRoots[itemId] = merkleRoot; // Update overall root
+        emit MerkleRootSet(itemId, stage, merkleRoot);
+    }
+    
+    /**
+     * @dev Verify document inclusion using Merkle proof
+     * @param itemId The subsidy item ID
+     * @param stage The workflow stage
+     * @param documentHash The hash of the document to verify
+     * @param proof The Merkle proof array
+     * @return valid True if document is included in the Merkle tree
+     */
+    function verifyDocumentInclusion(
+        uint256 itemId,
+        Stage stage,
+        bytes32 documentHash,
+        bytes32[] calldata proof
+    ) external view returns (bool valid) {
+        bytes32 root = stageMerkleRoots[itemId][stage];
+        if (root == bytes32(0)) return false;
+        
+        return MerkleProof.verify(proof, root, documentHash);
+    }
+    
+    /**
+     * @dev Batch verify multiple documents for an item
+     * @param itemId The subsidy item ID
+     * @param stage The workflow stage
+     * @param documentHashes Array of document hashes to verify
+     * @param proofs Array of Merkle proofs for each document
+     * @return allValid True if all documents are valid
+     */
+    function batchVerifyDocuments(
+        uint256 itemId,
+        Stage stage,
+        bytes32[] calldata documentHashes,
+        bytes32[][] calldata proofs
+    ) external view returns (bool allValid) {
+        require(documentHashes.length == proofs.length, "Array length mismatch");
+        
+        for (uint256 i = 0; i < documentHashes.length; i++) {
+            bytes32 root = stageMerkleRoots[itemId][stage];
+            if (root == bytes32(0)) return false;
+            
+            if (!MerkleProof.verify(proofs[i], root, documentHashes[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    /**
+     * @dev Get Merkle root for a specific item and stage
+     * @param itemId The subsidy item ID
+     * @param stage The workflow stage
+     * @return root The Merkle root
+     */
+    function getMerkleRoot(uint256 itemId, Stage stage) external view returns (bytes32 root) {
+        return stageMerkleRoots[itemId][stage];
+    }
+    
+    /**
+     * @dev Get overall Merkle root for an item
+     * @param itemId The subsidy item ID
+     * @return root The overall Merkle root
+     */
+    function getItemMerkleRoot(uint256 itemId) external view returns (bytes32 root) {
+        return itemMerkleRoots[itemId];
     }
 }

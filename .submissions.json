@@ -837,27 +837,6 @@
     "claimedAt": "2026-03-10T10:02:11.757Z"
   },
   {
-    "id": "APP-1773137425032",
-    "name": "34",
-    "district": "Kathmandu",
-    "role": "producer",
-    "status": "approved",
-    "createdAt": "2026-03-10T10:10:28.971Z",
-    "docs": [
-      {
-        "label": "processed.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmcidM13txrGdn7BfXZvUUQtzgnunihJEJjXSZrqgke26T",
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-12T13:47:35.720Z",
-    "qrData": "{\"itemId\":4,\"submissionId\":\"APP-1773137425032\",\"currentStage\":1,\"role\":\"producer\",\"cid\":\"QmcidM13txrGdn7BfXZvUUQtzgnunihJEJjXSZrqgke26T\",\"nextStage\":\"transporter_handover\",\"verifiedAt\":\"2026-03-12T13:47:35.937Z\"}",
-    "nextStage": "transporter_handover",
-    "blockchain_itemId": 4,
-    "current_stage": 1
-  },
-  {
     "id": "APP-1773139616774",
     "name": "34",
     "district": "jhfjhvb",
@@ -1263,29 +1242,6 @@
     "nextStage": "transporter_handover"
   },
   {
-    "id": "APP-1773202286978",
-    "name": "23",
-    "district": "Kathmandu",
-    "role": "producer",
-    "status": "claimed",
-    "createdAt": "2026-03-11T04:11:31.841Z",
-    "docs": [
-      {
-        "label": "Main_sysdev.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmSKL4uia28hF4TbyDQ4vh4psyMgATSTJ8BgaRjWc1eywQ",
-    "phone": "1234576980",
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-12T13:52:15.606Z",
-    "qrData": "{\"itemId\":5,\"submissionId\":\"APP-1773202286978\",\"currentStage\":1,\"role\":\"producer\",\"cid\":\"QmSKL4uia28hF4TbyDQ4vh4psyMgATSTJ8BgaRjWc1eywQ\",\"nextStage\":\"transporter_handover\",\"verifiedAt\":\"2026-03-12T13:52:16.983Z\"}",
-    "nextStage": "transporter_handover",
-    "blockchain_itemId": 5,
-    "current_stage": 6,
-    "claimedAt": "2026-03-14T13:53:40.122Z"
-  },
-  {
     "id": "APP-1773202673314",
     "name": "23",
     "district": "kathmanckj",
@@ -1328,144 +1284,6 @@
     "nextStage": "transporter_handover"
   },
   {
-    "id": "APP-1773204326835",
-    "name": "23",
-    "district": "dfvdf",
-    "role": "producer",
-    "status": "approved",
-    "createdAt": "2026-03-11T04:45:30.588Z",
-    "docs": [
-      {
-        "label": "Main_sysdev.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmSKL4uia28hF4TbyDQ4vh4psyMgATSTJ8BgaRjWc1eywQ",
-    "blockchain_itemId": 2,
-    "current_stage": 1,
-    "phone": "8924892489",
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-11T04:45:39.496Z",
-    "qrData": "{\"itemId\":2,\"submissionId\":\"APP-1773204326835\",\"currentStage\":1,\"role\":\"producer\",\"cid\":\"QmSKL4uia28hF4TbyDQ4vh4psyMgATSTJ8BgaRjWc1eywQ\",\"nextStage\":\"transporter_handover\",\"verifiedAt\":\"2026-03-11T04:45:42.608Z\"}",
-    "nextStage": "transporter_handover"
-  },
-  {
-    "id": "APP-1773204383099",
-    "name": "23",
-    "district": "hgfavxhjab",
-    "role": "transporter",
-    "status": "approved",
-    "createdAt": "2026-03-11T04:46:26.563Z",
-    "docs": [
-      {
-        "label": "sysdev.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmRDc9tXGosuUfYPeczEmibGbbZ97ooNRFcbTcvPTFRyGz",
-    "blockchain_itemId": 1,
-    "current_stage": 1,
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-11T04:46:34.445Z",
-    "qrData": "{\"itemId\":1,\"submissionId\":\"APP-1773204383099\",\"currentStage\":1,\"role\":\"transporter\",\"cid\":\"QmRDc9tXGosuUfYPeczEmibGbbZ97ooNRFcbTcvPTFRyGz\",\"nextStage\":\"transporter_handover\",\"verifiedAt\":\"2026-03-12T13:44:38.567Z\"}",
-    "nextStage": "transporter_handover"
-  },
-  {
-    "id": "APP-1773204477246",
-    "name": "34",
-    "district": "xf x s",
-    "role": "distributor",
-    "status": "approved",
-    "createdAt": "2026-03-11T04:48:01.713Z",
-    "docs": [
-      {
-        "label": "sysdev.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmRDc9tXGosuUfYPeczEmibGbbZ97ooNRFcbTcvPTFRyGz",
-    "blockchain_itemId": 1,
-    "current_stage": 1,
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-11T04:48:13.957Z",
-    "qrData": "{\"itemId\":1,\"submissionId\":\"APP-1773204477246\",\"currentStage\":1,\"role\":\"distributor\",\"cid\":\"QmRDc9tXGosuUfYPeczEmibGbbZ97ooNRFcbTcvPTFRyGz\",\"nextStage\":\"transporter_handover\",\"verifiedAt\":\"2026-03-12T13:44:38.567Z\"}",
-    "nextStage": "transporter_handover"
-  },
-  {
-    "id": "APP-1773206401949",
-    "name": "23",
-    "district": "sgfcahjs",
-    "role": "producer",
-    "status": "approved",
-    "createdAt": "2026-03-11T05:20:06.844Z",
-    "docs": [
-      {
-        "label": "sysdev.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmRDc9tXGosuUfYPeczEmibGbbZ97ooNRFcbTcvPTFRyGz",
-    "blockchain_itemId": 4,
-    "current_stage": 1,
-    "phone": "0987654123",
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-11T05:20:48.053Z",
-    "qrData": "{\"itemId\":4,\"submissionId\":\"APP-1773206401949\",\"currentStage\":1,\"role\":\"producer\",\"cid\":\"QmRDc9tXGosuUfYPeczEmibGbbZ97ooNRFcbTcvPTFRyGz\",\"nextStage\":\"transporter_handover\",\"verifiedAt\":\"2026-03-12T13:47:35.937Z\"}",
-    "nextStage": "transporter_handover"
-  },
-  {
-    "id": "APP-1773206487294",
-    "name": "23",
-    "district": "hgfavxhjab",
-    "role": "transporter",
-    "status": "claimed",
-    "createdAt": "2026-03-11T05:21:34.982Z",
-    "docs": [
-      {
-        "label": "sysdev.png",
-        "fileType": "image/png"
-      },
-      {
-        "label": "Main_sysdev.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmRDc9tXGosuUfYPeczEmibGbbZ97ooNRFcbTcvPTFRyGz",
-    "blockchain_itemId": 3,
-    "current_stage": 6,
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-11T05:21:43.517Z",
-    "qrData": "{\"itemId\":3,\"submissionId\":\"APP-1773206487294\",\"currentStage\":2,\"role\":\"transporter\",\"cid\":\"QmRDc9tXGosuUfYPeczEmibGbbZ97ooNRFcbTcvPTFRyGz\",\"approvedBy\":\"Admin\",\"approvedAt\":\"2026-03-11T05:21:43.517Z\",\"nextStage\":\"distributor_handover\"}",
-    "nextStage": "distributor_handover",
-    "claimedAt": "2026-03-14T13:43:08.653Z"
-  },
-  {
-    "id": "APP-1773206540338",
-    "name": "34",
-    "district": "xf x s",
-    "role": "distributor",
-    "status": "claimed",
-    "createdAt": "2026-03-11T05:22:27.557Z",
-    "docs": [
-      {
-        "label": "sysdev.png",
-        "fileType": "image/png"
-      },
-      {
-        "label": "system_dev.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmRDc9tXGosuUfYPeczEmibGbbZ97ooNRFcbTcvPTFRyGz",
-    "blockchain_itemId": 3,
-    "current_stage": 6,
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-11T05:22:36.482Z",
-    "qrData": "{\"itemId\":3,\"submissionId\":\"APP-1773206540338\",\"currentStage\":4,\"role\":\"distributor\",\"cid\":\"QmRDc9tXGosuUfYPeczEmibGbbZ97ooNRFcbTcvPTFRyGz\",\"approvedBy\":\"Admin\",\"approvedAt\":\"2026-03-11T05:22:36.482Z\",\"nextStage\":\"beneficiary_delivery\"}",
-    "nextStage": "beneficiary_delivery",
-    "claimedAt": "2026-03-14T13:43:08.654Z"
-  },
-  {
     "id": "APP-1773322439978",
     "name": "3422",
     "district": "ktm",
@@ -1485,192 +1303,6 @@
     "approvedAt": "2026-03-12T13:34:38.432Z",
     "qrData": "{\"itemId\":null,\"submissionId\":\"APP-1773322439978\",\"currentStage\":0,\"role\":\"producer\",\"cid\":\"QmfGidWHbnkKx81TnWQzYWAPxg4TNMnPM6mCZMzdnUcPmQ\",\"approvedBy\":\"Admin\",\"approvedAt\":\"2026-03-12T13:34:38.432Z\",\"nextStage\":\"transporter_handover\"}",
     "nextStage": "transporter_handover"
-  },
-  {
-    "id": "APP-1773323602200",
-    "name": "234",
-    "district": "xczxc ",
-    "role": "producer",
-    "status": "approved",
-    "createdAt": "2026-03-12T13:53:26.802Z",
-    "docs": [
-      {
-        "label": "sysdev.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmRDc9tXGosuUfYPeczEmibGbbZ97ooNRFcbTcvPTFRyGz",
-    "blockchain_itemId": 6,
-    "current_stage": 1,
-    "phone": "098789065",
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-12T13:53:36.230Z",
-    "qrData": "{\"itemId\":6,\"submissionId\":\"APP-1773323602200\",\"currentStage\":1,\"role\":\"producer\",\"cid\":\"QmRDc9tXGosuUfYPeczEmibGbbZ97ooNRFcbTcvPTFRyGz\",\"nextStage\":\"transporter_handover\",\"verifiedAt\":\"2026-03-12T13:53:36.595Z\"}",
-    "nextStage": "transporter_handover"
-  },
-  {
-    "id": "APP-1773323678765",
-    "name": "245",
-    "district": "lafdv",
-    "role": "transporter",
-    "status": "claimed",
-    "createdAt": "2026-03-12T13:54:42.926Z",
-    "docs": [
-      {
-        "label": "output.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmfGidWHbnkKx81TnWQzYWAPxg4TNMnPM6mCZMzdnUcPmQ",
-    "blockchain_itemId": 3,
-    "current_stage": 6,
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-12T14:05:40.618Z",
-    "claimedAt": "2026-03-14T13:43:08.654Z"
-  },
-  {
-    "id": "APP-1773323689396",
-    "name": "245",
-    "district": "lafdv",
-    "role": "transporter",
-    "status": "claimed",
-    "createdAt": "2026-03-12T13:54:52.862Z",
-    "docs": [
-      {
-        "label": "output.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmfGidWHbnkKx81TnWQzYWAPxg4TNMnPM6mCZMzdnUcPmQ",
-    "blockchain_itemId": 3,
-    "current_stage": 6,
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-12T14:05:44.759Z",
-    "claimedAt": "2026-03-14T13:43:08.654Z"
-  },
-  {
-    "id": "APP-1773323698193",
-    "name": "245",
-    "district": "lafdv",
-    "role": "transporter",
-    "status": "claimed",
-    "createdAt": "2026-03-12T13:55:02.084Z",
-    "docs": [
-      {
-        "label": "output.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmfGidWHbnkKx81TnWQzYWAPxg4TNMnPM6mCZMzdnUcPmQ",
-    "blockchain_itemId": 3,
-    "current_stage": 6,
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-12T14:05:48.294Z",
-    "claimedAt": "2026-03-14T13:43:08.655Z"
-  },
-  {
-    "id": "APP-1773323741305",
-    "name": "245",
-    "district": "lafdv",
-    "role": "transporter",
-    "status": "rejected",
-    "createdAt": "2026-03-12T13:55:45.212Z",
-    "docs": [
-      {
-        "label": "output.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmfGidWHbnkKx81TnWQzYWAPxg4TNMnPM6mCZMzdnUcPmQ",
-    "blockchain_itemId": 3,
-    "current_stage": 6,
-    "claimedAt": "2026-03-14T13:43:08.655Z",
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-14T13:47:41.957Z"
-  },
-  {
-    "id": "APP-1773324355155",
-    "name": "245",
-    "district": "lafdv",
-    "role": "transporter",
-    "status": "rejected",
-    "createdAt": "2026-03-12T14:05:58.858Z",
-    "docs": [
-      {
-        "label": "output.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmfGidWHbnkKx81TnWQzYWAPxg4TNMnPM6mCZMzdnUcPmQ",
-    "blockchain_itemId": 3,
-    "current_stage": 6,
-    "claimedAt": "2026-03-14T13:43:08.655Z",
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-14T13:47:46.138Z"
-  },
-  {
-    "id": "APP-1773324367104",
-    "name": "245",
-    "district": "lafdv",
-    "role": "transporter",
-    "status": "rejected",
-    "createdAt": "2026-03-12T14:06:10.533Z",
-    "docs": [
-      {
-        "label": "output.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmfGidWHbnkKx81TnWQzYWAPxg4TNMnPM6mCZMzdnUcPmQ",
-    "blockchain_itemId": 3,
-    "current_stage": 6,
-    "claimedAt": "2026-03-14T13:43:08.656Z",
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-14T13:47:49.982Z"
-  },
-  {
-    "id": "APP-1773324454810",
-    "name": "34",
-    "district": "kz,lmmc",
-    "role": "producer",
-    "status": "approved",
-    "createdAt": "2026-03-12T14:07:57.737Z",
-    "docs": [
-      {
-        "label": "d7e2d05a-d71c-4540-8c07-5e2cc998d8cb.jpg",
-        "fileType": "image/jpeg"
-      }
-    ],
-    "cid": "QmRADTvMrJLtWAuvbM7jxGA7dYx7YnHNXX3MpUjHhkAQ5R",
-    "blockchain_itemId": 7,
-    "current_stage": 1,
-    "phone": "098789065",
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-12T14:08:16.075Z",
-    "qrData": "{\"itemId\":7,\"submissionId\":\"APP-1773324454810\",\"currentStage\":1,\"role\":\"producer\",\"cid\":\"QmRADTvMrJLtWAuvbM7jxGA7dYx7YnHNXX3MpUjHhkAQ5R\",\"nextStage\":\"transporter_handover\",\"verifiedAt\":\"2026-03-12T14:08:17.944Z\"}",
-    "nextStage": "transporter_handover"
-  },
-  {
-    "id": "APP-1773324561966",
-    "name": "346",
-    "district": "nnbcxjuj",
-    "role": "transporter",
-    "status": "claimed",
-    "createdAt": "2026-03-12T14:09:25.670Z",
-    "docs": [
-      {
-        "label": "sequencediagramuserregistration.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmNqk72BNwQ9atWAjwF3Yvkztpv5DxUckGspBKyA8tvfgt",
-    "blockchain_itemId": 3,
-    "current_stage": 6,
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-12T16:13:26.872Z",
-    "qrData": "{\"itemId\":3,\"submissionId\":\"APP-1773324561966\",\"currentStage\":3,\"role\":\"transporter\",\"cid\":\"QmNqk72BNwQ9atWAjwF3Yvkztpv5DxUckGspBKyA8tvfgt\",\"nextStage\":\"distributor_handover\",\"verifiedAt\":\"2026-03-12T16:13:27.631Z\"}",
-    "nextStage": "distributor_handover",
-    "claimedAt": "2026-03-14T13:43:08.656Z"
   },
   {
     "id": "APP-1773328564361",
@@ -1841,278 +1473,6 @@
     "nextStage": "transporter_handover"
   },
   {
-    "id": "APP-1773330504798",
-    "name": "2344",
-    "district": "fjkl",
-    "role": "producer",
-    "status": "claimed",
-    "createdAt": "2026-03-12T15:48:28.886Z",
-    "docs": [
-      {
-        "label": "mermaid-diagram.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmaMh5iHRZc6EaiK1cGkLr6cUM1kUfZLYoa8mwsRzKWQFV",
-    "blockchain_itemId": 184,
-    "current_stage": 6,
-    "phone": "1234551234",
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-12T15:48:38.567Z",
-    "qrData": "{\"itemId\":184,\"submissionId\":\"APP-1773330504798\",\"currentStage\":1,\"role\":\"producer\",\"cid\":\"QmaMh5iHRZc6EaiK1cGkLr6cUM1kUfZLYoa8mwsRzKWQFV\",\"nextStage\":\"transporter_handover\",\"verifiedAt\":\"2026-03-12T15:48:39.442Z\"}",
-    "nextStage": "transporter_handover",
-    "claimedAt": "2026-03-12T15:53:50.937Z"
-  },
-  {
-    "id": "APP-1773330598993",
-    "name": "2541",
-    "district": "dshgbkl",
-    "role": "transporter",
-    "status": "claimed",
-    "createdAt": "2026-03-12T15:50:02.198Z",
-    "docs": [
-      {
-        "label": "userapplication system.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmbqjamneFR27jQgHaWrxFyoEq5RJvArYRtyjZW4U4bK74",
-    "blockchain_itemId": 184,
-    "current_stage": 6,
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-12T15:50:32.348Z",
-    "qrData": "{\"itemId\":184,\"submissionId\":\"APP-1773330598993\",\"currentStage\":3,\"role\":\"transporter\",\"cid\":\"QmbqjamneFR27jQgHaWrxFyoEq5RJvArYRtyjZW4U4bK74\",\"nextStage\":\"distributor_handover\",\"verifiedAt\":\"2026-03-12T15:50:33.795Z\"}",
-    "nextStage": "distributor_handover",
-    "claimedAt": "2026-03-12T15:53:50.938Z"
-  },
-  {
-    "id": "APP-1773330694738",
-    "name": "23657",
-    "district": "djhbklm",
-    "role": "distributor",
-    "status": "claimed",
-    "createdAt": "2026-03-12T15:51:39.111Z",
-    "docs": [
-      {
-        "label": "ChatGPT Image Mar 11, 2026, 03_11_39 PM.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmfXr7X7rs7aBcXXABLFGDXJESBvUptQbMxTbs9BDvCgVs",
-    "blockchain_itemId": 184,
-    "current_stage": 6,
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-12T15:51:59.824Z",
-    "qrData": "{\"itemId\":184,\"submissionId\":\"APP-1773330694738\",\"currentStage\":5,\"role\":\"distributor\",\"cid\":\"QmfXr7X7rs7aBcXXABLFGDXJESBvUptQbMxTbs9BDvCgVs\",\"nextStage\":\"beneficiary_delivery\",\"verifiedAt\":\"2026-03-12T15:52:01.172Z\"}",
-    "nextStage": "beneficiary_delivery",
-    "claimedAt": "2026-03-12T15:53:50.939Z"
-  },
-  {
-    "id": "APP-1773331829865",
-    "name": "1234",
-    "district": "kathmandu",
-    "role": "producer",
-    "status": "claimed",
-    "createdAt": "2026-03-12T16:10:33.769Z",
-    "docs": [
-      {
-        "label": "workflowdia.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmY3sgbzyEbpnWARobLHfCVWpwXEzCC63MNq3trbJpruA1",
-    "blockchain_itemId": 520,
-    "current_stage": 6,
-    "phone": "111111111",
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-12T16:11:23.437Z",
-    "qrData": "{\"itemId\":520,\"submissionId\":\"APP-1773331829865\",\"currentStage\":1,\"role\":\"producer\",\"cid\":\"QmY3sgbzyEbpnWARobLHfCVWpwXEzCC63MNq3trbJpruA1\",\"nextStage\":\"transporter_handover\",\"verifiedAt\":\"2026-03-12T16:11:25.776Z\"}",
-    "nextStage": "transporter_handover",
-    "claimedAt": "2026-03-12T16:16:17.418Z"
-  },
-  {
-    "id": "APP-1773331971571",
-    "name": "1223",
-    "district": "Kathmandu",
-    "role": "transporter",
-    "status": "claimed",
-    "createdAt": "2026-03-12T16:12:55.897Z",
-    "docs": [
-      {
-        "label": "ChatGPT Image Mar 11, 2026, 03_11_39 PM.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmfXr7X7rs7aBcXXABLFGDXJESBvUptQbMxTbs9BDvCgVs",
-    "blockchain_itemId": 520,
-    "current_stage": 6,
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-12T16:13:51.023Z",
-    "qrData": "{\"itemId\":520,\"submissionId\":\"APP-1773331971571\",\"currentStage\":3,\"role\":\"transporter\",\"cid\":\"QmfXr7X7rs7aBcXXABLFGDXJESBvUptQbMxTbs9BDvCgVs\",\"nextStage\":\"distributor_handover\",\"verifiedAt\":\"2026-03-12T16:13:51.409Z\"}",
-    "nextStage": "distributor_handover",
-    "claimedAt": "2026-03-12T16:16:17.419Z"
-  },
-  {
-    "id": "APP-1773332093805",
-    "name": "1224",
-    "district": "Nawalparasi",
-    "role": "distributor",
-    "status": "claimed",
-    "createdAt": "2026-03-12T16:14:56.965Z",
-    "docs": [
-      {
-        "label": "userapplication system.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmbqjamneFR27jQgHaWrxFyoEq5RJvArYRtyjZW4U4bK74",
-    "blockchain_itemId": 520,
-    "current_stage": 6,
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-12T16:15:15.931Z",
-    "qrData": "{\"itemId\":520,\"submissionId\":\"APP-1773332093805\",\"currentStage\":5,\"role\":\"distributor\",\"cid\":\"QmbqjamneFR27jQgHaWrxFyoEq5RJvArYRtyjZW4U4bK74\",\"nextStage\":\"beneficiary_delivery\",\"verifiedAt\":\"2026-03-12T16:15:17.438Z\"}",
-    "nextStage": "beneficiary_delivery",
-    "claimedAt": "2026-03-12T16:16:17.420Z"
-  },
-  {
-    "id": "APP-1773335432247",
-    "name": "24",
-    "district": "Lalitpur",
-    "role": "producer",
-    "status": "claimed",
-    "createdAt": "2026-03-12T17:10:36.531Z",
-    "docs": [
-      {
-        "label": "ChatGPT Image Mar 11, 2026, 03_11_39 PM.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmfXr7X7rs7aBcXXABLFGDXJESBvUptQbMxTbs9BDvCgVs",
-    "blockchain_itemId": 402,
-    "current_stage": 6,
-    "phone": "1111122222",
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-12T17:11:27.215Z",
-    "qrData": "{\"itemId\":402,\"submissionId\":\"APP-1773335432247\",\"currentStage\":1,\"role\":\"producer\",\"cid\":\"QmfXr7X7rs7aBcXXABLFGDXJESBvUptQbMxTbs9BDvCgVs\",\"nextStage\":\"transporter_handover\",\"verifiedAt\":\"2026-03-12T17:11:28.659Z\"}",
-    "nextStage": "transporter_handover",
-    "claimedAt": "2026-03-12T17:18:40.052Z"
-  },
-  {
-    "id": "APP-1773335595319",
-    "name": "234",
-    "district": "vzd",
-    "role": "transporter",
-    "status": "claimed",
-    "createdAt": "2026-03-12T17:13:20.960Z",
-    "docs": [
-      {
-        "label": "sequencediagramuserregistration.png",
-        "fileType": "image/png"
-      },
-      {
-        "label": "userapplication system.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmNqk72BNwQ9atWAjwF3Yvkztpv5DxUckGspBKyA8tvfgt",
-    "blockchain_itemId": 402,
-    "current_stage": 6,
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-12T17:15:27.251Z",
-    "qrData": "{\"itemId\":402,\"submissionId\":\"APP-1773335595319\",\"currentStage\":3,\"role\":\"transporter\",\"cid\":\"QmNqk72BNwQ9atWAjwF3Yvkztpv5DxUckGspBKyA8tvfgt\",\"nextStage\":\"distributor_handover\",\"verifiedAt\":\"2026-03-12T17:15:29.512Z\"}",
-    "nextStage": "distributor_handover",
-    "claimedAt": "2026-03-12T17:18:40.052Z"
-  },
-  {
-    "id": "APP-1773335797759",
-    "name": "234",
-    "district": "Chitlang",
-    "role": "distributor",
-    "status": "claimed",
-    "createdAt": "2026-03-12T17:16:42.360Z",
-    "docs": [
-      {
-        "label": "finalblockcdia.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmZ4h8DRTAruEXKfoMZiGWFq1gBPdvmPf6pHX5RecP9DDC",
-    "blockchain_itemId": 402,
-    "current_stage": 6,
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-12T17:17:13.952Z",
-    "qrData": "{\"itemId\":402,\"submissionId\":\"APP-1773335797759\",\"currentStage\":5,\"role\":\"distributor\",\"cid\":\"QmZ4h8DRTAruEXKfoMZiGWFq1gBPdvmPf6pHX5RecP9DDC\",\"nextStage\":\"beneficiary_delivery\",\"verifiedAt\":\"2026-03-12T17:17:16.683Z\"}",
-    "nextStage": "beneficiary_delivery",
-    "claimedAt": "2026-03-12T17:18:40.053Z"
-  },
-  {
-    "id": "APP-1773336105811",
-    "name": "23",
-    "district": "Kathmandu",
-    "role": "producer",
-    "status": "claimed",
-    "createdAt": "2026-03-12T17:21:49.772Z",
-    "docs": [
-      {
-        "label": "output.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmfGidWHbnkKx81TnWQzYWAPxg4TNMnPM6mCZMzdnUcPmQ",
-    "blockchain_itemId": 236,
-    "current_stage": 6,
-    "phone": "1111122222",
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-12T17:22:58.745Z",
-    "qrData": "{\"itemId\":236,\"submissionId\":\"APP-1773336105811\",\"currentStage\":1,\"role\":\"producer\",\"cid\":\"QmfGidWHbnkKx81TnWQzYWAPxg4TNMnPM6mCZMzdnUcPmQ\",\"nextStage\":\"transporter_handover\",\"verifiedAt\":\"2026-03-12T17:23:01.536Z\"}",
-    "nextStage": "transporter_handover",
-    "claimedAt": "2026-03-12T17:26:57.957Z"
-  },
-  {
-    "id": "APP-1773336255110",
-    "name": "23",
-    "district": "z cC",
-    "role": "transporter",
-    "status": "claimed",
-    "createdAt": "2026-03-12T17:24:19.681Z",
-    "docs": [
-      {
-        "label": "ChatGPT Image Mar 11, 2026, 03_11_39 PM.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmfXr7X7rs7aBcXXABLFGDXJESBvUptQbMxTbs9BDvCgVs",
-    "blockchain_itemId": 236,
-    "current_stage": 6,
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-12T17:24:43.290Z",
-    "qrData": "{\"itemId\":236,\"submissionId\":\"APP-1773336255110\",\"currentStage\":3,\"role\":\"transporter\",\"cid\":\"QmfXr7X7rs7aBcXXABLFGDXJESBvUptQbMxTbs9BDvCgVs\",\"nextStage\":\"distributor_handover\",\"verifiedAt\":\"2026-03-12T17:24:44.859Z\"}",
-    "nextStage": "distributor_handover",
-    "claimedAt": "2026-03-12T17:26:57.958Z"
-  },
-  {
-    "id": "APP-1773336369418",
-    "name": "234",
-    "district": "ktm",
-    "role": "distributor",
-    "status": "claimed",
-    "createdAt": "2026-03-12T17:26:12.973Z",
-    "docs": [
-      {
-        "label": "sequencediagramuserregistration.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmNqk72BNwQ9atWAjwF3Yvkztpv5DxUckGspBKyA8tvfgt",
-    "blockchain_itemId": 236,
-    "current_stage": 6,
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-12T17:26:29.638Z",
-    "qrData": "{\"itemId\":236,\"submissionId\":\"APP-1773336369418\",\"currentStage\":5,\"role\":\"distributor\",\"cid\":\"QmNqk72BNwQ9atWAjwF3Yvkztpv5DxUckGspBKyA8tvfgt\",\"nextStage\":\"beneficiary_delivery\",\"verifiedAt\":\"2026-03-12T17:26:32.274Z\"}",
-    "nextStage": "beneficiary_delivery",
-    "claimedAt": "2026-03-12T17:26:57.959Z"
-  },
-  {
     "id": "APP-1773337064452",
     "name": "234",
     "district": "Lalitpur",
@@ -2176,213 +1536,48 @@
     "nextStage": "transporter_handover"
   },
   {
-    "id": "APP-1773338433908",
-    "name": "123",
+    "id": "APP-1773848912114",
+    "name": "2r23",
+    "district": "fbzd",
+    "role": "producer",
+    "status": "rejected",
+    "createdAt": "2026-03-18T15:48:35.236Z",
+    "docs": [
+      {
+        "label": "userapplication system.png",
+        "fileType": "image/png"
+      }
+    ],
+    "cid": "QmbqjamneFR27jQgHaWrxFyoEq5RJvArYRtyjZW4U4bK74",
+    "phone": "1324532123",
+    "approvedBy": "Admin",
+    "approvedAt": "2026-03-19T04:25:33.934Z"
+  },
+  {
+    "id": "APP-1773894496524",
+    "name": "23465",
     "district": "Kathmandu",
     "role": "producer",
-    "status": "claimed",
-    "createdAt": "2026-03-12T18:00:38.195Z",
+    "status": "rejected",
+    "createdAt": "2026-03-19T04:28:19.907Z",
     "docs": [
       {
-        "label": "finalblockcdia.drawio.png",
+        "label": "mermaid-diagram.png",
         "fileType": "image/png"
       }
     ],
-    "cid": "QmZ4h8DRTAruEXKfoMZiGWFq1gBPdvmPf6pHX5RecP9DDC",
-    "blockchain_itemId": 310,
-    "current_stage": 6,
-    "phone": "1234123455",
+    "cid": "QmaMh5iHRZc6EaiK1cGkLr6cUM1kUfZLYoa8mwsRzKWQFV",
+    "phone": "9876543211",
     "approvedBy": "Admin",
-    "approvedAt": "2026-03-12T18:01:12.070Z",
-    "qrData": "{\"itemId\":310,\"submissionId\":\"APP-1773338433908\",\"currentStage\":1,\"role\":\"producer\",\"cid\":\"QmZ4h8DRTAruEXKfoMZiGWFq1gBPdvmPf6pHX5RecP9DDC\",\"nextStage\":\"transporter_handover\",\"verifiedAt\":\"2026-03-12T18:01:19.876Z\"}",
-    "nextStage": "transporter_handover",
-    "claimedAt": "2026-03-12T18:06:58.485Z"
+    "approvedAt": "2026-03-19T04:36:31.512Z"
   },
   {
-    "id": "APP-1773338571283",
-    "name": "234",
-    "district": "Kathmandu",
-    "role": "transporter",
-    "status": "claimed",
-    "createdAt": "2026-03-12T18:02:55.042Z",
-    "docs": [
-      {
-        "label": "sequencediagramuserregistration.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmNqk72BNwQ9atWAjwF3Yvkztpv5DxUckGspBKyA8tvfgt",
-    "blockchain_itemId": 310,
-    "current_stage": 6,
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-12T18:03:28.787Z",
-    "qrData": "{\"itemId\":310,\"submissionId\":\"APP-1773338571283\",\"currentStage\":3,\"role\":\"transporter\",\"cid\":\"QmNqk72BNwQ9atWAjwF3Yvkztpv5DxUckGspBKyA8tvfgt\",\"nextStage\":\"distributor_handover\",\"verifiedAt\":\"2026-03-12T18:03:31.474Z\"}",
-    "nextStage": "distributor_handover",
-    "claimedAt": "2026-03-12T18:06:58.485Z"
-  },
-  {
-    "id": "APP-1773338718765",
-    "name": "234",
-    "district": "Nawalparasi",
-    "role": "distributor",
-    "status": "claimed",
-    "createdAt": "2026-03-12T18:05:22.277Z",
-    "docs": [
-      {
-        "label": "qr (62).png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmQ3qjBPG4k8dK9dQQZ5oY6j1FP9XJrfq1pVhaKNqpTDJd",
-    "blockchain_itemId": 310,
-    "current_stage": 6,
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-12T18:05:41.166Z",
-    "qrData": "{\"itemId\":310,\"submissionId\":\"APP-1773338718765\",\"currentStage\":5,\"role\":\"distributor\",\"cid\":\"QmQ3qjBPG4k8dK9dQQZ5oY6j1FP9XJrfq1pVhaKNqpTDJd\",\"nextStage\":\"beneficiary_delivery\",\"verifiedAt\":\"2026-03-12T18:05:46.335Z\"}",
-    "nextStage": "beneficiary_delivery",
-    "claimedAt": "2026-03-12T18:06:58.486Z"
-  },
-  {
-    "id": "APP-1773419911942",
-    "name": "234",
-    "district": "Kathmandu",
-    "role": "producer",
-    "status": "claimed",
-    "createdAt": "2026-03-13T16:38:36.067Z",
-    "docs": [
-      {
-        "label": "KMC STEAM Report Week 13.pdf",
-        "fileType": "application/pdf"
-      }
-    ],
-    "cid": "QmS378g4XerQj6q3nTUmAKToqbKguaZsYYwAYBPZmnLdgV",
-    "blockchain_itemId": 413,
-    "current_stage": 6,
-    "phone": "9875643512",
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-13T16:39:34.061Z",
-    "qrData": "{\"itemId\":413,\"submissionId\":\"APP-1773419911942\",\"currentStage\":1,\"role\":\"producer\",\"cid\":\"QmS378g4XerQj6q3nTUmAKToqbKguaZsYYwAYBPZmnLdgV\",\"nextStage\":\"transporter_handover\",\"verifiedAt\":\"2026-03-13T16:39:35.609Z\"}",
-    "nextStage": "transporter_handover",
-    "claimedAt": "2026-03-13T16:50:14.866Z"
-  },
-  {
-    "id": "APP-1773420074376",
-    "name": "2435",
-    "district": "Kathmandu",
-    "role": "transporter",
-    "status": "claimed",
-    "createdAt": "2026-03-13T16:41:17.796Z",
-    "docs": [
-      {
-        "label": "output.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmfGidWHbnkKx81TnWQzYWAPxg4TNMnPM6mCZMzdnUcPmQ",
-    "blockchain_itemId": 413,
-    "current_stage": 6,
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-13T16:42:26.605Z",
-    "qrData": "{\"itemId\":413,\"submissionId\":\"APP-1773420074376\",\"currentStage\":3,\"role\":\"transporter\",\"cid\":\"QmfGidWHbnkKx81TnWQzYWAPxg4TNMnPM6mCZMzdnUcPmQ\",\"nextStage\":\"distributor_handover\",\"verifiedAt\":\"2026-03-13T16:42:27.340Z\"}",
-    "nextStage": "distributor_handover",
-    "claimedAt": "2026-03-13T16:50:14.866Z"
-  },
-  {
-    "id": "APP-1773420381373",
-    "name": "356",
-    "district": "Jumla",
-    "role": "distributor",
-    "status": "claimed",
-    "createdAt": "2026-03-13T16:46:25.137Z",
-    "docs": [
-      {
-        "label": "finalblockcdia.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmZ4h8DRTAruEXKfoMZiGWFq1gBPdvmPf6pHX5RecP9DDC",
-    "blockchain_itemId": 413,
-    "current_stage": 6,
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-13T16:46:50.202Z",
-    "qrData": "{\"itemId\":413,\"submissionId\":\"APP-1773420381373\",\"currentStage\":5,\"role\":\"distributor\",\"cid\":\"QmZ4h8DRTAruEXKfoMZiGWFq1gBPdvmPf6pHX5RecP9DDC\",\"nextStage\":\"beneficiary_delivery\",\"verifiedAt\":\"2026-03-13T16:46:50.942Z\"}",
-    "nextStage": "beneficiary_delivery",
-    "claimedAt": "2026-03-13T16:50:14.867Z"
-  },
-  {
-    "id": "APP-1773420831600",
-    "name": "346",
-    "district": "Kathmandu",
-    "role": "producer",
-    "status": "claimed",
-    "createdAt": "2026-03-13T16:53:54.993Z",
-    "docs": [
-      {
-        "label": "finalblockcdia.drawio.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmZ4h8DRTAruEXKfoMZiGWFq1gBPdvmPf6pHX5RecP9DDC",
-    "blockchain_itemId": 58,
-    "current_stage": 6,
-    "phone": "9875111111",
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-13T16:54:20.123Z",
-    "qrData": "{\"itemId\":58,\"submissionId\":\"APP-1773420831600\",\"currentStage\":1,\"role\":\"producer\",\"cid\":\"QmZ4h8DRTAruEXKfoMZiGWFq1gBPdvmPf6pHX5RecP9DDC\",\"nextStage\":\"transporter_handover\",\"verifiedAt\":\"2026-03-13T16:54:21.226Z\"}",
-    "nextStage": "transporter_handover",
-    "claimedAt": "2026-03-13T16:57:33.664Z"
-  },
-  {
-    "id": "APP-1773420916320",
-    "name": "5769",
-    "district": "Kathmandu",
-    "role": "transporter",
-    "status": "claimed",
-    "createdAt": "2026-03-13T16:55:20.041Z",
-    "docs": [
-      {
-        "label": "finalblockcdia.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmZ4h8DRTAruEXKfoMZiGWFq1gBPdvmPf6pHX5RecP9DDC",
-    "blockchain_itemId": 58,
-    "current_stage": 6,
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-13T16:55:41.251Z",
-    "qrData": "{\"itemId\":58,\"submissionId\":\"APP-1773420916320\",\"currentStage\":3,\"role\":\"transporter\",\"cid\":\"QmZ4h8DRTAruEXKfoMZiGWFq1gBPdvmPf6pHX5RecP9DDC\",\"nextStage\":\"distributor_handover\",\"verifiedAt\":\"2026-03-13T16:55:41.938Z\"}",
-    "nextStage": "distributor_handover",
-    "claimedAt": "2026-03-13T16:57:33.664Z"
-  },
-  {
-    "id": "APP-1773420993434",
-    "name": "3567",
-    "district": "Pharping",
-    "role": "distributor",
-    "status": "claimed",
-    "createdAt": "2026-03-13T16:56:37.031Z",
-    "docs": [
-      {
-        "label": "workflowdia.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmY3sgbzyEbpnWARobLHfCVWpwXEzCC63MNq3trbJpruA1",
-    "blockchain_itemId": 58,
-    "current_stage": 6,
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-13T16:56:58.370Z",
-    "qrData": "{\"itemId\":58,\"submissionId\":\"APP-1773420993434\",\"currentStage\":5,\"role\":\"distributor\",\"cid\":\"QmY3sgbzyEbpnWARobLHfCVWpwXEzCC63MNq3trbJpruA1\",\"nextStage\":\"beneficiary_delivery\",\"verifiedAt\":\"2026-03-13T16:56:58.951Z\"}",
-    "nextStage": "beneficiary_delivery",
-    "claimedAt": "2026-03-13T16:57:33.664Z"
-  },
-  {
-    "id": "APP-1773495496724",
-    "name": "345",
+    "id": "APP-1773895026167",
+    "name": "34352",
     "district": "Lalitpur",
     "role": "producer",
     "status": "claimed",
-    "createdAt": "2026-03-14T13:38:19.697Z",
+    "createdAt": "2026-03-19T04:37:09.647Z",
     "docs": [
       {
         "label": "output.png",
@@ -2390,133 +1585,22 @@
       }
     ],
     "cid": "QmfGidWHbnkKx81TnWQzYWAPxg4TNMnPM6mCZMzdnUcPmQ",
-    "blockchain_itemId": 3,
+    "blockchain_itemId": 2,
     "current_stage": 6,
-    "phone": "1111111222",
+    "phone": "9876543211",
     "approvedBy": "Admin",
-    "approvedAt": "2026-03-14T13:38:42.463Z",
-    "qrData": "{\"itemId\":3,\"submissionId\":\"APP-1773495496724\",\"currentStage\":1,\"role\":\"producer\",\"cid\":\"QmfGidWHbnkKx81TnWQzYWAPxg4TNMnPM6mCZMzdnUcPmQ\",\"nextStage\":\"transporter_handover\",\"verifiedAt\":\"2026-03-14T13:38:44.329Z\"}",
+    "approvedAt": "2026-03-19T04:45:39.011Z",
+    "qrData": "{\"itemId\":2,\"submissionId\":\"APP-1773895026167\",\"currentStage\":1,\"role\":\"producer\",\"cid\":\"QmfGidWHbnkKx81TnWQzYWAPxg4TNMnPM6mCZMzdnUcPmQ\",\"nextStage\":\"transporter_handover\",\"verifiedAt\":\"2026-03-19T04:45:40.272Z\"}",
     "nextStage": "transporter_handover",
-    "claimedAt": "2026-03-14T13:43:08.656Z"
+    "claimedAt": "2026-03-19T06:57:06.515Z"
   },
   {
-    "id": "APP-1773495585948",
-    "name": "476",
-    "district": "Pocha Hiti",
+    "id": "APP-1773895623512",
+    "name": "234",
+    "district": "Kalinchowk",
     "role": "transporter",
     "status": "claimed",
-    "createdAt": "2026-03-14T13:39:48.998Z",
-    "docs": [
-      {
-        "label": "sequencediagramuserregistration.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmNqk72BNwQ9atWAjwF3Yvkztpv5DxUckGspBKyA8tvfgt",
-    "blockchain_itemId": 3,
-    "current_stage": 6,
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-14T13:40:27.929Z",
-    "qrData": "{\"itemId\":3,\"submissionId\":\"APP-1773495585948\",\"currentStage\":3,\"role\":\"transporter\",\"cid\":\"QmNqk72BNwQ9atWAjwF3Yvkztpv5DxUckGspBKyA8tvfgt\",\"nextStage\":\"distributor_handover\",\"verifiedAt\":\"2026-03-14T13:40:28.818Z\"}",
-    "nextStage": "distributor_handover",
-    "claimedAt": "2026-03-14T13:43:08.657Z"
-  },
-  {
-    "id": "APP-1773495709549",
-    "name": "245",
-    "district": "Sarlahi",
-    "role": "distributor",
-    "status": "claimed",
-    "createdAt": "2026-03-14T13:41:53.758Z",
-    "docs": [
-      {
-        "label": "ChatGPT Image Mar 11, 2026, 03_11_39 PM.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmfXr7X7rs7aBcXXABLFGDXJESBvUptQbMxTbs9BDvCgVs",
-    "blockchain_itemId": 3,
-    "current_stage": 6,
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-14T13:42:15.995Z",
-    "qrData": "{\"itemId\":3,\"submissionId\":\"APP-1773495709549\",\"currentStage\":5,\"role\":\"distributor\",\"cid\":\"QmfXr7X7rs7aBcXXABLFGDXJESBvUptQbMxTbs9BDvCgVs\",\"nextStage\":\"beneficiary_delivery\",\"verifiedAt\":\"2026-03-14T13:42:17.188Z\"}",
-    "nextStage": "beneficiary_delivery",
-    "claimedAt": "2026-03-14T13:43:08.657Z"
-  },
-  {
-    "id": "APP-1773495978561",
-    "name": "356",
-    "district": "Kathmandu",
-    "role": "producer",
-    "status": "approved",
-    "createdAt": "2026-03-14T13:46:22.548Z",
-    "docs": [
-      {
-        "label": "ChatGPT Image Mar 11, 2026, 03_11_39 PM.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmfXr7X7rs7aBcXXABLFGDXJESBvUptQbMxTbs9BDvCgVs",
-    "blockchain_itemId": 4,
-    "current_stage": 1,
-    "phone": "1111111222",
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-14T13:48:57.788Z",
-    "qrData": "{\"itemId\":4,\"submissionId\":\"APP-1773495978561\",\"currentStage\":1,\"role\":\"producer\",\"cid\":\"QmfXr7X7rs7aBcXXABLFGDXJESBvUptQbMxTbs9BDvCgVs\",\"nextStage\":\"transporter_handover\",\"verifiedAt\":\"2026-03-14T13:49:01.463Z\"}",
-    "nextStage": "transporter_handover"
-  },
-  {
-    "id": "APP-1773496120832",
-    "name": "345",
-    "district": "Kathmandu",
-    "role": "producer",
-    "status": "claimed",
-    "createdAt": "2026-03-14T13:48:43.856Z",
-    "docs": [
-      {
-        "label": "qr (2).png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmV3XcSaz6YpDNJY8eTSJ1UkDh2xh5YVjEKHJiA3aitu7z",
-    "blockchain_itemId": 5,
-    "current_stage": 6,
-    "phone": "1245321451",
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-14T13:49:26.802Z",
-    "qrData": "{\"itemId\":5,\"submissionId\":\"APP-1773496120832\",\"currentStage\":1,\"role\":\"producer\",\"cid\":\"QmV3XcSaz6YpDNJY8eTSJ1UkDh2xh5YVjEKHJiA3aitu7z\",\"nextStage\":\"transporter_handover\",\"verifiedAt\":\"2026-03-14T13:49:27.278Z\"}",
-    "nextStage": "transporter_handover",
-    "claimedAt": "2026-03-14T13:53:40.123Z"
-  },
-  {
-    "id": "APP-1773496233647",
-    "name": "345",
-    "district": "Kathmandu",
-    "role": "transporter",
-    "status": "claimed",
-    "createdAt": "2026-03-14T13:50:37.023Z",
-    "docs": [
-      {
-        "label": "output.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmfGidWHbnkKx81TnWQzYWAPxg4TNMnPM6mCZMzdnUcPmQ",
-    "blockchain_itemId": 5,
-    "current_stage": 6,
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-14T13:51:23.299Z",
-    "qrData": "{\"itemId\":5,\"submissionId\":\"APP-1773496233647\",\"currentStage\":3,\"role\":\"transporter\",\"cid\":\"QmfGidWHbnkKx81TnWQzYWAPxg4TNMnPM6mCZMzdnUcPmQ\",\"nextStage\":\"distributor_handover\",\"verifiedAt\":\"2026-03-14T13:51:24.257Z\"}",
-    "nextStage": "distributor_handover",
-    "claimedAt": "2026-03-14T13:53:40.124Z"
-  },
-  {
-    "id": "APP-1773496353360",
-    "name": "145",
-    "district": "Nawalparasi",
-    "role": "distributor",
-    "status": "claimed",
-    "createdAt": "2026-03-14T13:52:36.725Z",
+    "createdAt": "2026-03-19T04:47:07.337Z",
     "docs": [
       {
         "label": "finalblockcdia.drawio.png",
@@ -2524,88 +1608,21 @@
       }
     ],
     "cid": "QmZ4h8DRTAruEXKfoMZiGWFq1gBPdvmPf6pHX5RecP9DDC",
-    "blockchain_itemId": 5,
+    "blockchain_itemId": 2,
     "current_stage": 6,
     "approvedBy": "Admin",
-    "approvedAt": "2026-03-14T13:52:53.288Z",
-    "qrData": "{\"itemId\":5,\"submissionId\":\"APP-1773496353360\",\"currentStage\":5,\"role\":\"distributor\",\"cid\":\"QmZ4h8DRTAruEXKfoMZiGWFq1gBPdvmPf6pHX5RecP9DDC\",\"nextStage\":\"beneficiary_delivery\",\"verifiedAt\":\"2026-03-14T13:52:54.970Z\"}",
-    "nextStage": "beneficiary_delivery",
-    "claimedAt": "2026-03-14T13:53:40.124Z"
-  },
-  {
-    "id": "APP-1773554343104",
-    "name": "487",
-    "district": "Kathmandu",
-    "role": "producer",
-    "status": "claimed",
-    "createdAt": "2026-03-15T05:59:06.573Z",
-    "docs": [
-      {
-        "label": "system_dev.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmUzHeMDniD5ybRauLzgavfUqxAPMc1wBA6BmGnJQQEzBZ",
-    "blockchain_itemId": 195,
-    "current_stage": 6,
-    "phone": "9874564561",
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-15T06:00:10.735Z",
-    "qrData": "{\"itemId\":195,\"submissionId\":\"APP-1773554343104\",\"currentStage\":1,\"role\":\"producer\",\"cid\":\"QmUzHeMDniD5ybRauLzgavfUqxAPMc1wBA6BmGnJQQEzBZ\",\"nextStage\":\"transporter_handover\",\"verifiedAt\":\"2026-03-15T06:00:12.392Z\"}",
-    "nextStage": "transporter_handover",
-    "claimedAt": "2026-03-15T06:06:03.924Z"
-  },
-  {
-    "id": "APP-1773554559227",
-    "name": "4576",
-    "district": "Kathmandu",
-    "role": "transporter",
-    "status": "claimed",
-    "createdAt": "2026-03-15T06:02:44.233Z",
-    "docs": [
-      {
-        "label": "system_dev.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmUzHeMDniD5ybRauLzgavfUqxAPMc1wBA6BmGnJQQEzBZ",
-    "blockchain_itemId": 195,
-    "current_stage": 6,
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-15T06:03:16.272Z",
-    "qrData": "{\"itemId\":195,\"submissionId\":\"APP-1773554559227\",\"currentStage\":3,\"role\":\"transporter\",\"cid\":\"QmUzHeMDniD5ybRauLzgavfUqxAPMc1wBA6BmGnJQQEzBZ\",\"nextStage\":\"distributor_handover\",\"verifiedAt\":\"2026-03-15T06:03:17.526Z\"}",
+    "approvedAt": "2026-03-19T04:48:12.585Z",
+    "qrData": "{\"itemId\":2,\"submissionId\":\"APP-1773895623512\",\"currentStage\":3,\"role\":\"transporter\",\"cid\":\"QmZ4h8DRTAruEXKfoMZiGWFq1gBPdvmPf6pHX5RecP9DDC\",\"nextStage\":\"distributor_handover\",\"verifiedAt\":\"2026-03-19T04:48:13.319Z\"}",
     "nextStage": "distributor_handover",
-    "claimedAt": "2026-03-15T06:06:03.925Z"
+    "claimedAt": "2026-03-19T06:57:06.515Z"
   },
   {
-    "id": "APP-1773554681673",
-    "name": "2365",
-    "district": "Nawalparasi",
+    "id": "APP-1773895757970",
+    "name": "242",
+    "district": "Kalinchowk",
     "role": "distributor",
     "status": "claimed",
-    "createdAt": "2026-03-15T06:04:45.279Z",
-    "docs": [
-      {
-        "label": "Main_sysdev.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmSKL4uia28hF4TbyDQ4vh4psyMgATSTJ8BgaRjWc1eywQ",
-    "blockchain_itemId": 195,
-    "current_stage": 6,
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-15T06:05:15.575Z",
-    "qrData": "{\"itemId\":195,\"submissionId\":\"APP-1773554681673\",\"currentStage\":5,\"role\":\"distributor\",\"cid\":\"QmSKL4uia28hF4TbyDQ4vh4psyMgATSTJ8BgaRjWc1eywQ\",\"nextStage\":\"beneficiary_delivery\",\"verifiedAt\":\"2026-03-15T06:05:17.328Z\"}",
-    "nextStage": "beneficiary_delivery",
-    "claimedAt": "2026-03-15T06:06:03.925Z"
-  },
-  {
-    "id": "APP-1773566251965",
-    "name": "345",
-    "district": "Kathmandu",
-    "role": "producer",
-    "status": "claimed",
-    "createdAt": "2026-03-15T09:17:35.583Z",
+    "createdAt": "2026-03-19T04:49:21.036Z",
     "docs": [
       {
         "label": "userapplication system.png",
@@ -2613,66 +1630,21 @@
       }
     ],
     "cid": "QmbqjamneFR27jQgHaWrxFyoEq5RJvArYRtyjZW4U4bK74",
-    "blockchain_itemId": 274,
-    "current_stage": 6,
-    "phone": "9862442359",
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-15T09:18:39.666Z",
-    "qrData": "{\"itemId\":274,\"submissionId\":\"APP-1773566251965\",\"currentStage\":1,\"role\":\"producer\",\"cid\":\"QmbqjamneFR27jQgHaWrxFyoEq5RJvArYRtyjZW4U4bK74\",\"nextStage\":\"transporter_handover\",\"verifiedAt\":\"2026-03-15T09:18:41.521Z\"}",
-    "nextStage": "transporter_handover",
-    "claimedAt": "2026-03-15T09:22:53.356Z"
-  },
-  {
-    "id": "APP-1773566422964",
-    "name": "3544",
-    "district": "Ktm",
-    "role": "transporter",
-    "status": "claimed",
-    "createdAt": "2026-03-15T09:20:27.894Z",
-    "docs": [
-      {
-        "label": "ChatGPT Image Mar 11, 2026, 03_11_39 PM.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmfXr7X7rs7aBcXXABLFGDXJESBvUptQbMxTbs9BDvCgVs",
-    "blockchain_itemId": 274,
+    "blockchain_itemId": 2,
     "current_stage": 6,
     "approvedBy": "Admin",
-    "approvedAt": "2026-03-15T09:20:49.838Z",
-    "qrData": "{\"itemId\":274,\"submissionId\":\"APP-1773566422964\",\"currentStage\":3,\"role\":\"transporter\",\"cid\":\"QmfXr7X7rs7aBcXXABLFGDXJESBvUptQbMxTbs9BDvCgVs\",\"nextStage\":\"distributor_handover\",\"verifiedAt\":\"2026-03-15T09:20:50.642Z\"}",
-    "nextStage": "distributor_handover",
-    "claimedAt": "2026-03-15T09:22:53.357Z"
-  },
-  {
-    "id": "APP-1773566501481",
-    "name": "245",
-    "district": "jhdbdjcs",
-    "role": "distributor",
-    "status": "claimed",
-    "createdAt": "2026-03-15T09:21:45.602Z",
-    "docs": [
-      {
-        "label": "final sysdev.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmT22EuwgXQQ7xtBq1ysoESXn6mqjGfASDaEWJUZrhxVxt",
-    "blockchain_itemId": 274,
-    "current_stage": 6,
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-15T09:22:00.942Z",
-    "qrData": "{\"itemId\":274,\"submissionId\":\"APP-1773566501481\",\"currentStage\":5,\"role\":\"distributor\",\"cid\":\"QmT22EuwgXQQ7xtBq1ysoESXn6mqjGfASDaEWJUZrhxVxt\",\"nextStage\":\"beneficiary_delivery\",\"verifiedAt\":\"2026-03-15T09:22:01.292Z\"}",
+    "approvedAt": "2026-03-19T04:52:27.223Z",
+    "qrData": "{\"itemId\":2,\"submissionId\":\"APP-1773895757970\",\"currentStage\":5,\"role\":\"distributor\",\"cid\":\"QmbqjamneFR27jQgHaWrxFyoEq5RJvArYRtyjZW4U4bK74\",\"nextStage\":\"beneficiary_delivery\",\"verifiedAt\":\"2026-03-19T04:52:28.258Z\"}",
     "nextStage": "beneficiary_delivery",
-    "claimedAt": "2026-03-15T09:22:53.357Z"
+    "claimedAt": "2026-03-19T06:57:06.516Z"
   },
   {
-    "id": "APP-1773643905868",
-    "name": "245",
-    "district": "sfvs",
+    "id": "APP-1773901297118",
+    "name": "34563",
+    "district": "Kathmandu",
     "role": "producer",
     "status": "claimed",
-    "createdAt": "2026-03-16T06:51:49.949Z",
+    "createdAt": "2026-03-19T06:21:42.045Z",
     "docs": [
       {
         "label": "ChatGPT Image Mar 11, 2026, 03_11_39 PM.png",
@@ -2680,44 +1652,22 @@
       }
     ],
     "cid": "QmfXr7X7rs7aBcXXABLFGDXJESBvUptQbMxTbs9BDvCgVs",
-    "blockchain_itemId": 953,
+    "blockchain_itemId": 2,
     "current_stage": 6,
-    "phone": "9864568990",
+    "phone": "9876543451",
     "approvedBy": "Admin",
-    "approvedAt": "2026-03-16T06:53:10.216Z",
-    "qrData": "{\"itemId\":953,\"submissionId\":\"APP-1773643905868\",\"currentStage\":1,\"role\":\"producer\",\"cid\":\"QmfXr7X7rs7aBcXXABLFGDXJESBvUptQbMxTbs9BDvCgVs\",\"nextStage\":\"transporter_handover\",\"verifiedAt\":\"2026-03-16T06:53:12.158Z\"}",
+    "approvedAt": "2026-03-19T06:29:18.966Z",
+    "qrData": "{\"itemId\":2,\"submissionId\":\"APP-1773901297118\",\"currentStage\":1,\"role\":\"producer\",\"cid\":\"QmfXr7X7rs7aBcXXABLFGDXJESBvUptQbMxTbs9BDvCgVs\",\"nextStage\":\"transporter_handover\",\"verifiedAt\":\"2026-03-19T06:29:21.875Z\"}",
     "nextStage": "transporter_handover",
-    "claimedAt": "2026-03-16T06:55:40.609Z"
+    "claimedAt": "2026-03-19T06:57:06.516Z"
   },
   {
-    "id": "APP-1773644030910",
-    "name": "245",
-    "district": "zsffz",
+    "id": "APP-1773902494864",
+    "name": "5465",
+    "district": "hvhbln",
     "role": "transporter",
     "status": "claimed",
-    "createdAt": "2026-03-16T06:53:53.989Z",
-    "docs": [
-      {
-        "label": "sequencediagramuserregistration.png",
-        "fileType": "image/png"
-      }
-    ],
-    "cid": "QmNqk72BNwQ9atWAjwF3Yvkztpv5DxUckGspBKyA8tvfgt",
-    "blockchain_itemId": 953,
-    "current_stage": 6,
-    "approvedBy": "Admin",
-    "approvedAt": "2026-03-16T06:54:14.596Z",
-    "qrData": "{\"itemId\":953,\"submissionId\":\"APP-1773644030910\",\"currentStage\":3,\"role\":\"transporter\",\"cid\":\"QmNqk72BNwQ9atWAjwF3Yvkztpv5DxUckGspBKyA8tvfgt\",\"nextStage\":\"distributor_handover\",\"verifiedAt\":\"2026-03-16T06:54:14.833Z\"}",
-    "nextStage": "distributor_handover",
-    "claimedAt": "2026-03-16T06:55:40.614Z"
-  },
-  {
-    "id": "APP-1773644084541",
-    "name": "43453",
-    "district": "xcx",
-    "role": "distributor",
-    "status": "claimed",
-    "createdAt": "2026-03-16T06:54:49.199Z",
+    "createdAt": "2026-03-19T06:41:38.135Z",
     "docs": [
       {
         "label": "userapplication system.png",
@@ -2725,12 +1675,34 @@
       }
     ],
     "cid": "QmbqjamneFR27jQgHaWrxFyoEq5RJvArYRtyjZW4U4bK74",
-    "blockchain_itemId": 953,
+    "blockchain_itemId": 2,
     "current_stage": 6,
     "approvedBy": "Admin",
-    "approvedAt": "2026-03-16T06:55:07.128Z",
-    "qrData": "{\"itemId\":953,\"submissionId\":\"APP-1773644084541\",\"currentStage\":5,\"role\":\"distributor\",\"cid\":\"QmbqjamneFR27jQgHaWrxFyoEq5RJvArYRtyjZW4U4bK74\",\"nextStage\":\"beneficiary_delivery\",\"verifiedAt\":\"2026-03-16T06:55:07.389Z\"}",
+    "approvedAt": "2026-03-19T06:41:58.502Z",
+    "qrData": "{\"itemId\":2,\"submissionId\":\"APP-1773902494864\",\"currentStage\":3,\"role\":\"transporter\",\"cid\":\"QmbqjamneFR27jQgHaWrxFyoEq5RJvArYRtyjZW4U4bK74\",\"nextStage\":\"distributor_handover\",\"verifiedAt\":\"2026-03-19T06:42:00.291Z\"}",
+    "nextStage": "distributor_handover",
+    "claimedAt": "2026-03-19T06:57:06.516Z"
+  },
+  {
+    "id": "APP-1773903334854",
+    "name": "224",
+    "district": "sddc",
+    "role": "distributor",
+    "status": "claimed",
+    "createdAt": "2026-03-19T06:55:37.537Z",
+    "docs": [
+      {
+        "label": "userapplication system.png",
+        "fileType": "image/png"
+      }
+    ],
+    "cid": "QmbqjamneFR27jQgHaWrxFyoEq5RJvArYRtyjZW4U4bK74",
+    "blockchain_itemId": 2,
+    "current_stage": 6,
+    "approvedBy": "Admin",
+    "approvedAt": "2026-03-19T06:56:28.166Z",
+    "qrData": "{\"itemId\":2,\"submissionId\":\"APP-1773903334854\",\"currentStage\":5,\"role\":\"distributor\",\"cid\":\"QmbqjamneFR27jQgHaWrxFyoEq5RJvArYRtyjZW4U4bK74\",\"nextStage\":\"beneficiary_delivery\",\"verifiedAt\":\"2026-03-19T06:56:30.904Z\"}",
     "nextStage": "beneficiary_delivery",
-    "claimedAt": "2026-03-16T06:55:40.614Z"
+    "claimedAt": "2026-03-19T06:57:06.516Z"
   }
 ]
