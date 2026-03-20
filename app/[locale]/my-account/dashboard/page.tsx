@@ -542,7 +542,25 @@ const createPrintableClaimReceipt = (receiptData: any, producerSub: Submission |
             
             ${nodeHandovers.length > 0 ? `
             <div class="print-section">
-                <h2>Processing Nodes & Handover History</h2>
+                <h2>Processing Participants</h2>
+                <div class="print-grid">
+                    ${nodeHandovers.map((node: any) => {
+                        const roleLabel = node.nodeRole === 'producer' ? 'Processor' : 
+                                         node.nodeRole === 'transporter' ? 'Transporter' : 'Distributor';
+                        return `
+                            <div class="print-info-item">
+                                <div class="print-info-label">${roleLabel}</div>
+                                <div class="print-info-value">${node.name || node.nodeName} (${node.nodeDistrict})</div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+            ` : ''}
+            
+            ${nodeHandovers.length > 0 ? `
+            <div class="print-section">
+                <h2>Processing Chain Details</h2>
                 <div class="print-node-timeline">
                     ${nodeHandovers.map((node: any, index: number) => `
                         <div class="print-node-item">
@@ -551,7 +569,7 @@ const createPrintableClaimReceipt = (receiptData: any, producerSub: Submission |
                                     ${node.nodeRole === 'producer' ? '🏛️' : node.nodeRole === 'transporter' ? '🚚' : '📍'}
                                 </div>
                                 <div class="print-node-details">
-                                    <h4>${node.nodeName}</h4>
+                                    <h4>${node.nodeRole === 'producer' ? 'Processor' : node.nodeRole === 'transporter' ? 'Transporter' : 'Distributor'}: ${node.nodeName}</h4>
                                     <div class="print-node-meta">
                                         <span class="print-node-role">${node.nodeRole}</span>
                                         <span>${node.nodeDistrict}</span>
@@ -644,7 +662,7 @@ export default function BeneficiaryDashboardPage() {
         }
     }, []);
 
-    const fetchReceipt = useCallback(async (receiptId?: string, itemId?: number) => {
+    const fetchReceipt = useCallback(async (receiptId?: string, itemId?: number, submissions?: Submission[]) => {
         try {
             const params = new URLSearchParams();
             if (receiptId) params.append('receiptId', receiptId);
@@ -654,9 +672,57 @@ export default function BeneficiaryDashboardPage() {
             if (res.ok) {
                 const data = await res.json();
                 setReceiptData(data.receipt);
+                return;
             }
         } catch (e) {
-            console.error("Failed to load receipt", e);
+            console.error("Failed to load receipt from API", e);
+        }
+
+        // Fallback: Create receipt data from submissions
+        if (submissions && itemId) {
+            const relatedSubmissions = submissions.filter(s => s.blockchain_itemId === itemId);
+            const beneficiary = relatedSubmissions.find(s => s.role === 'producer');
+            const claimedSub = relatedSubmissions.find(s => s.status === 'claimed');
+
+            if (beneficiary && claimedSub) {
+                const fallbackReceipt = {
+                    receiptId: receiptId || `RCPT-FALLBACK-${Date.now()}`,
+                    itemId: itemId,
+                    beneficiary: {
+                        name: beneficiary.name,
+                        district: beneficiary.district,
+                        phone: beneficiary.phone,
+                        applicationId: beneficiary.id
+                    },
+                    claimDetails: {
+                        claimedAt: claimedSub.claimedAt || new Date().toISOString(),
+                        claimTransactionHash: null,
+                        stage: 6,
+                        status: 'claimed'
+                    },
+                    nodeHandovers: relatedSubmissions
+                        .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+                        .map(sub => ({
+                            nodeId: sub.id,
+                            nodeName: sub.name,
+                            nodeRole: sub.role,
+                            nodeDistrict: sub.district,
+                            handoverTime: sub.createdAt,
+                            approvedAt: sub.approvedAt,
+                            status: sub.status,
+                            blockchainItemId: sub.blockchain_itemId,
+                            ipfsCid: sub.cid
+                        })),
+                    blockchainLogs: [],
+                    metadata: {
+                        generatedAt: new Date().toISOString(),
+                        systemVersion: '1.0.0',
+                        receiptType: 'fallback_claim_receipt'
+                    }
+                };
+                setReceiptData(fallbackReceipt);
+                console.log('[BeneficiaryDashboard] Using fallback receipt data');
+            }
         }
     }, []);
 
@@ -694,7 +760,7 @@ export default function BeneficiaryDashboardPage() {
                 // Fetch receipt data if available
                 const claimedSubmission = mySubmissions.find(s => s.status === 'claimed');
                 if (claimedSubmission?.receiptId || claimedSubmission?.blockchain_itemId) {
-                    await fetchReceipt(claimedSubmission.receiptId, claimedSubmission.blockchain_itemId);
+                    await fetchReceipt(claimedSubmission.receiptId, claimedSubmission.blockchain_itemId, mySubmissions);
                 }
             }
         } catch (e) {
@@ -702,7 +768,7 @@ export default function BeneficiaryDashboardPage() {
         } finally {
             setLoading(false);
         }
-    }, [fetchBlockchainLogs, phone]);
+    }, [fetchBlockchainLogs, fetchReceipt, phone]);
 
     // Poll every 4s + refresh immediately when the user tabs back to this page
     useEffect(() => {
@@ -825,7 +891,7 @@ export default function BeneficiaryDashboardPage() {
                                         </p>
                                         <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
                                             <button
-                                                onClick={() => router.push("/apply")}
+                                                onClick={() => router.push(`/${locale}/apply`)}
                                                 style={{ ...styles.startBtn, padding: "10px 24px" }}
                                             >
                                                 Apply for New Subsidy
@@ -838,16 +904,8 @@ export default function BeneficiaryDashboardPage() {
                                                         // If receipt data is not loaded, fetch it on demand
                                                         if (!currentReceiptData && producerSub?.blockchain_itemId) {
                                                             try {
-                                                                const params = new URLSearchParams();
-                                                                if (producerSub.receiptId) params.append('receiptId', producerSub.receiptId);
-                                                                if (producerSub.blockchain_itemId) params.append('itemId', producerSub.blockchain_itemId.toString());
-                                                                
-                                                                const res = await fetch(`/api/blockchain/receipt?${params}`);
-                                                                if (res.ok) {
-                                                                    const data = await res.json();
-                                                                    currentReceiptData = data.receipt;
-                                                                    setReceiptData(data.receipt); // Update state for future use
-                                                                }
+                                                                await fetchReceipt(producerSub.receiptId, producerSub.blockchain_itemId, submissions);
+                                                                currentReceiptData = receiptData;
                                                             } catch (e) {
                                                                 console.error("Failed to load receipt data", e);
                                                                 alert('Failed to load receipt data. Please try again.');
@@ -1445,7 +1503,7 @@ function ClaimReceiptView({ receiptData, producerSub, onPrint }: {
                     <InfoItem 
                         label="Claim Date & Time" 
                         value={receipt.claimDetails?.claimedAt ? 
-                            new Date(receipt.claimDetails.claimAt).toLocaleString("en-US", {
+                            new Date(receipt.claimDetails.claimedAt).toLocaleString("en-US", {
                                 month: "short", day: "numeric", year: "numeric",
                                 hour: "2-digit", minute: "2-digit"
                             }) : "N/A"
@@ -1457,10 +1515,30 @@ function ClaimReceiptView({ receiptData, producerSub, onPrint }: {
                 </div>
             </div>
 
-            {/* Node Handover Timeline */}
+            {/* Processing Participants Summary */}
             {nodeHandovers.length > 0 && (
                 <div style={{ marginBottom: 24 }}>
-                    <h3 style={{ fontSize: 16, fontWeight: 700, color: "#1e293b", marginBottom: 16 }}>Processing Node History</h3>
+                    <h3 style={{ fontSize: 16, fontWeight: 700, color: "#1e293b", marginBottom: 16 }}>Processing Participants</h3>
+                    <div style={styles.grid}>
+                        {nodeHandovers.map((node: any) => {
+                            const roleLabel = node.nodeRole === "producer" ? "Processor" : 
+                                             node.nodeRole === "transporter" ? "Transporter" : "Distributor";
+                            return (
+                                <InfoItem 
+                                    key={node.nodeId}
+                                    label={roleLabel} 
+                                    value={`${node.name || node.nodeName} (${node.nodeDistrict})`}
+                                />
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
+            {/* Processing Chain Details */}
+            {nodeHandovers.length > 0 && (
+                <div style={{ marginBottom: 24 }}>
+                    <h3 style={{ fontSize: 16, fontWeight: 700, color: "#1e293b", marginBottom: 16 }}>Processing Chain Details</h3>
                     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                         {nodeHandovers.map((node: any, index: number) => (
                             <div key={node.nodeId} style={{
@@ -1483,7 +1561,10 @@ function ClaimReceiptView({ receiptData, producerSub, onPrint }: {
                                         {node.nodeRole === "producer" ? "🏛️" : node.nodeRole === "transporter" ? "🚚" : "📍"}
                                     </div>
                                     <div>
-                                        <div style={{ fontSize: 14, fontWeight: 700 }}>{node.nodeName}</div>
+                                        <div style={{ fontSize: 14, fontWeight: 700 }}>
+                                            {node.nodeRole === "producer" ? "Processor" : 
+                                             node.nodeRole === "transporter" ? "Transporter" : "Distributor"}: {node.nodeName}
+                                        </div>
                                         <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 2 }}>
                                             <span style={{
                                                 fontSize: 10, fontWeight: 800, textTransform: "uppercase",

@@ -215,6 +215,8 @@ export default function ProcessorDashboardPage() {
   const [mySubmissions, setMySubmissions] = useState<Submission[]>([]);
   const [loadingStatus, setLoadingStatus] = useState(false);
   const [expandedQR, setExpandedQR] = useState<Submission | null>(null);
+  const [approvedBeneficiaries, setApprovedBeneficiaries] = useState<any[]>([]);
+  const [loadingBeneficiaries, setLoadingBeneficiaries] = useState(false);
 
   const fetchMySubmissions = useCallback(async () => {
     setLoadingStatus(true);
@@ -239,12 +241,35 @@ export default function ProcessorDashboardPage() {
     }
   }, []);
 
+  const fetchApprovedBeneficiaries = useCallback(async () => {
+    setLoadingBeneficiaries(true);
+    try {
+      const res = await fetch("/api/approved-beneficiaries");
+      if (!res.ok) throw new Error(`Server returned ${res.status}`);
+      const data = await res.json();
+      if (!data.success) throw new Error("API returned error");
+      setApprovedBeneficiaries(data.data || []);
+    } catch (err) {
+      console.error("[processor] fetchApprovedBeneficiaries failed:", err);
+      showToast("Could not load approved beneficiaries — check browser console.");
+    } finally {
+      setLoadingBeneficiaries(false);
+    }
+  }, []);
+
   // Poll every 10 seconds
   useEffect(() => {
     fetchMySubmissions();
     const interval = setInterval(fetchMySubmissions, 10_000);
     return () => clearInterval(interval);
   }, [fetchMySubmissions]);
+
+  // Fetch approved beneficiaries when tasks view is active
+  useEffect(() => {
+    if (activeView === "tasks") {
+      fetchApprovedBeneficiaries();
+    }
+  }, [activeView, fetchApprovedBeneficiaries]);
 
   // Re-fetch whenever the user navigates to the upload view
   useEffect(() => {
@@ -479,6 +504,110 @@ export default function ProcessorDashboardPage() {
                 onClick={() => setActiveView("upload")}
               />
             </div>
+          </section>
+        )}
+
+        {/* Approved Beneficiaries Section */}
+        {activeView === "tasks" && (
+          <section style={styles.card}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+              <h2 style={styles.h2}>Approved Subsidy Beneficiaries</h2>
+              <button
+                style={styles.refreshBtn}
+                onClick={fetchApprovedBeneficiaries}
+                disabled={loadingBeneficiaries}
+              >
+                {loadingBeneficiaries ? "Loading…" : "↻ Refresh"}
+              </button>
+            </div>
+            
+            {loadingBeneficiaries ? (
+              <div style={{ padding: "24px 0", textAlign: "center", color: "#aaa", fontSize: 14 }}>
+                Loading approved beneficiaries…
+              </div>
+            ) : approvedBeneficiaries.length === 0 ? (
+              <div style={{ padding: "24px 0", textAlign: "center", color: "#aaa", fontSize: 13 }}>
+                No approved beneficiaries found.
+              </div>
+            ) : (
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+                  <thead>
+                    <tr style={{ borderBottom: "2px solid #e5e7eb" }}>
+                      <th style={{ padding: "12px 8px", textAlign: "left", fontWeight: "600", color: "#374151" }}>ID</th>
+                      <th style={{ padding: "12px 8px", textAlign: "left", fontWeight: "600", color: "#374151" }}>Full Name</th>
+                      <th style={{ padding: "12px 8px", textAlign: "left", fontWeight: "600", color: "#374151" }}>Phone</th>
+                      <th style={{ padding: "12px 8px", textAlign: "left", fontWeight: "600", color: "#374151" }}>Identity</th>
+                      <th style={{ padding: "12px 8px", textAlign: "left", fontWeight: "600", color: "#374151" }}>Location</th>
+                      <th style={{ padding: "12px 8px", textAlign: "left", fontWeight: "600", color: "#374151" }}>KYC Status</th>
+                      <th style={{ padding: "12px 8px", textAlign: "left", fontWeight: "600", color: "#374151" }}>Batch ID</th>
+                      <th style={{ padding: "12px 8px", textAlign: "left", fontWeight: "600", color: "#374151" }}>Created</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {approvedBeneficiaries.map((beneficiary, index) => (
+                      <tr 
+                        key={beneficiary.id} 
+                        style={{ 
+                          borderBottom: "1px solid #f3f4f6",
+                          backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9fafb"
+                        }}
+                      >
+                        <td style={{ padding: "12px 8px", fontFamily: "monospace", fontSize: "10px", color: "#3D4B9C" }}>
+                          {beneficiary.id.slice(0, 8)}...
+                        </td>
+                        <td style={{ padding: "12px 8px", fontSize: "13px", color: "#374151", fontWeight: "500" }}>
+                          {beneficiary.beneficiary_name}
+                        </td>
+                        <td style={{ padding: "12px 8px", fontSize: "12px", color: "#6b7280" }}>
+                          {beneficiary.beneficiary_phone}
+                        </td>
+                        <td style={{ padding: "12px 8px", fontSize: "11px", color: "#6b7280" }}>
+                          <div>
+                            <div style={{ fontWeight: "500" }}>{beneficiary.identity_type}</div>
+                            <div style={{ fontFamily: "monospace", fontSize: "10px", color: "#9ca3af" }}>
+                              {beneficiary.identity_no}
+                            </div>
+                          </div>
+                        </td>
+                        <td style={{ padding: "12px 8px", fontSize: "12px", color: "#6b7280" }}>
+                          <div>
+                            <div>Ward {beneficiary.ward_no}</div>
+                            {beneficiary.tole_name && (
+                              <div style={{ fontSize: "11px", color: "#9ca3af" }}>
+                                {beneficiary.tole_name}
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                        <td style={{ padding: "12px 8px" }}>
+                          <span style={{
+                            padding: "4px 8px",
+                            borderRadius: "12px",
+                            fontSize: "11px",
+                            fontWeight: "600",
+                            backgroundColor: beneficiary.kyc_status === 'APPROVED' ? "#dcfce7" : "#fef3c7",
+                            color: beneficiary.kyc_status === 'APPROVED' ? "#166534" : "#92400e"
+                          }}>
+                            {beneficiary.kyc_status}
+                          </span>
+                        </td>
+                        <td style={{ padding: "12px 8px", fontSize: "12px", color: "#6b7280" }}>
+                          {beneficiary.batch_id || 'N/A'}
+                        </td>
+                        <td style={{ padding: "12px 8px", fontSize: "12px", color: "#6b7280" }}>
+                          {new Date(beneficiary.created_at).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric"
+                          })}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </section>
         )}
 
@@ -1168,6 +1297,38 @@ function InventoryRow({
 }
 
 /* ---------------- Styles -------------------------------------------------- */
+function getStageColor(stage: number): { bg: string; text: string } {
+  const stageColors: { [key: number]: { bg: string; text: string } } = {
+    0: { bg: "#fef3c7", text: "#92400e" },    // Created - yellow
+    1: { bg: "#dcfce7", text: "#166534" },    // Verified by Admin - green
+    2: { bg: "#dbeafe", text: "#1e40af" },    // Transporter Ready - blue
+    3: { bg: "#e9d5ff", text: "#6b21a8" },    // In Transit - purple
+    4: { bg: "#fed7aa", text: "#9a3412" },    // Distributor Ready - orange
+    5: { bg: "#ccfbf1", text: "#134e4a" },    // Distributed - teal
+    6: { bg: "#f0fdf4", text: "#166534" },    // Claimed - green
+    7: { bg: "#fef2f2", text: "#991b1b" },    // Cancelled - red
+  };
+  return stageColors[stage] || { bg: "#f3f4f6", text: "#6b7280" };
+}
+
+function getProgressColor(percentage: number): string {
+  if (percentage >= 85) return "#10b981";  // green
+  if (percentage >= 60) return "#3b82f6";  // blue
+  if (percentage >= 30) return "#f59e0b";  // yellow
+  return "#ef4444";  // red
+}
+
+function getStatusColor(status: string): { bg: string; text: string } {
+  const statusColors: { [key: string]: { bg: string; text: string } } = {
+    'processed': { bg: "#dcfce7", text: "#166534" },    // green
+    'transported': { bg: "#dbeafe", text: "#1e40af" },  // blue
+    'distributed': { bg: "#fef3c7", text: "#92400e" },  // yellow
+    'approved': { bg: "#f0fdf4", text: "#166534" },     // green
+    'default': { bg: "#f3f4f6", text: "#6b7280" }       // gray
+  };
+  return statusColors[status] || statusColors.default;
+}
+
 const styles: Record<string, React.CSSProperties> = {
   shell: {
     display: "flex",

@@ -1,0 +1,77 @@
+{
+  "receiptId": "RCPT-TEST-1773996497843",
+  "itemId": 2,
+  "beneficiary": {
+    "name": "34352",
+    "district": "Lalitpur",
+    "phone": "9876543211",
+    "applicationId": "APP-1773895026167"
+  },
+  "claimDetails": {
+    "claimedAt": "2026-03-20T08:20:40.168Z",
+    "claimTransactionHash": "0x1234567890abcdef1234567890abcdef12345678",
+    "stage": 6,
+    "status": "claimed"
+  },
+  "nodeHandovers": [
+    {
+      "nodeId": "APP-1773895026167",
+      "nodeName": "34352",
+      "nodeRole": "producer",
+      "nodeDistrict": "Lalitpur",
+      "handoverTime": "2026-03-19T04:37:09.647Z",
+      "approvedAt": "2026-03-19T04:45:39.011Z",
+      "status": "approved",
+      "blockchainItemId": 2,
+      "ipfsCid": "QmfGidWHbnkKx81TnWQzYWAPxg4TNMnPM6mCZMzdnUcPmQ"
+    },
+    {
+      "nodeId": "TRANS-001",
+      "nodeName": "Transport Service Nepal",
+      "nodeRole": "transporter",
+      "nodeDistrict": "Kathmandu",
+      "handoverTime": "2026-03-19T06:00:00.000Z",
+      "approvedAt": "2026-03-19T08:30:00.000Z",
+      "status": "approved",
+      "blockchainItemId": 2
+    },
+    {
+      "nodeId": "DIST-001",
+      "nodeName": "District Supply Center",
+      "nodeRole": "distributor",
+      "nodeDistrict": "Lalitpur",
+      "handoverTime": "2026-03-20T07:00:00.000Z",
+      "approvedAt": "2026-03-20T07:45:00.000Z",
+      "status": "approved",
+      "blockchainItemId": 2
+    }
+  ],
+  "blockchainLogs": [
+    {
+      "eventName": "ItemCreated",
+      "transactionHash": "0x1234567890abcdef1234567890abcdef12345678",
+      "blockNumber": 12345,
+      "timestamp": "2026-03-19T04:37:10.000Z",
+      "args": {
+        "itemId": 2,
+        "beneficiary": "0x1234567890123456789012345678901234567890"
+      }
+    },
+    {
+      "eventName": "SubsidyClaimed",
+      "transactionHash": "0xabcdef1234567890abcdef1234567890abcdef12",
+      "blockNumber": 12350,
+      "timestamp": "2026-03-20T08:20:41.000Z",
+      "args": {
+        "itemId": 2,
+        "beneficiary": "0x1234567890123456789012345678901234567890",
+        "claimedBy": "0x0987654321098765432109876543210987654321"
+      }
+    }
+  ],
+  "metadata": {
+    "generatedAt": "2026-03-20T08:25:00.000Z",
+    "systemVersion": "1.0.0",
+    "receiptType": "comprehensive_claim_receipt"
+  }
+}

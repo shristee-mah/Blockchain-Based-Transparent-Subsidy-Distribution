@@ -767,6 +767,13 @@ export default function AdminDashboardPage() {
             "Upcoming Subsidy Programs: Livestock Support Scheme",
             "Irrigation Equipment Subsidy",
             "Organic Fertilizer Incentive",
+            "Seed Distribution Phase II: High-Yield Rice & Maize",
+            "Small-Scale Poultry Grant Application Window",
+            "Weather Index Insurance Premium Support",
+            "Mechanization Grant: 40% Off Tractor Purchases",
+            "Post-Harvest Storage Construction Subsidy",
+            "Greenhouse Farming Technology Grant 2026",
+            "Solar-Powered Borehole Initiative for Rural Areas"
           ].map((text, i) => (
             <span key={`marquee-${i}`} style={styles.marqueeText}>
               {text} &nbsp;•&nbsp;{" "}
@@ -774,6 +781,7 @@ export default function AdminDashboardPage() {
           ))}
         </div>
       </div>
+      
 
       <div style={styles.shell}>
         {/* Toast — top right confirmation */}
@@ -1477,7 +1485,18 @@ export default function AdminDashboardPage() {
                         padding: "20px",
                         marginBottom: "16px",
                         border: "1px solid #e5e7eb",
-                        boxShadow: "0 1px 3px rgba(0,0,0,0.1)"
+                        boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                        cursor: "pointer",
+                        transition: "all 0.2s ease"
+                      }}
+                      onClick={() => router.push('/apply')}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = "#3D4B9C";
+                        e.currentTarget.style.boxShadow = "0 4px 12px rgba(61,75,156,0.15)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = "#e5e7eb";
+                        e.currentTarget.style.boxShadow = "0 1px 3px rgba(0,0,0,0.1)";
                       }}>
                         {/* Application Header */}
                         <div style={{
