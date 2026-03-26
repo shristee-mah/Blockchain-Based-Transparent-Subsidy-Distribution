@@ -1,7 +1,8 @@
-const { ethers } = require("hardhat");
+const { ethers } = require("ethers");
 
 class CleanEventListener {
     constructor() {
+        this.provider = null;
         this.contract = null;
         this.isMonitoring = false;
         this.eventCount = 0;
@@ -17,7 +18,24 @@ class CleanEventListener {
     async initialize() {
         try {
             const contractAddress = process.env.CONTRACT_ADDRESS || "0x5FbDB2315678afecb367f032d93F642f64180aa3";
-            this.contract = await ethers.getContractAt("TransparentSubsidySystem", contractAddress);
+            
+            // Use direct RPC provider
+            this.provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545");
+            
+            // Contract ABI with events
+            const contractABI = [
+                "event TransactionLogged(bytes32 indexed itemId, address indexed actor, string action)",
+                "event ItemCreated(uint256 indexed itemId, address indexed beneficiary, string ipfsHash)",
+                "event ItemVerified(uint256 indexed itemId, uint8 newStage)",
+                "event DocumentUploaded(uint256 indexed itemId, uint8 stage, string ipfsHash, address uploader)",
+                "event SubsidyClaimed(uint256 indexed itemId, address indexed beneficiary, address claimedBy)",
+                "event MerkleRootSet(uint256 indexed itemId, uint8 indexed stage, bytes32 merkleRoot)",
+                "event DocumentBatchVerified(uint256 indexed itemId, uint8 indexed stage, bytes32 merkleRoot)",
+                "event ItemCancelled(uint256 indexed itemId)",
+                "function createItem(address beneficiary, string calldata ipfsHash)"
+            ];
+            
+            this.contract = new ethers.Contract(contractAddress, contractABI, this.provider);
             
             console.log("BLOCKCHAIN EVENT LISTENER");
             console.log("Contract:", contractAddress);
@@ -139,12 +157,12 @@ class CleanEventListener {
     }
 
     handleRealtimeEvent(event) {
+        this.eventCount++;
         const timestamp = new Date().toLocaleTimeString();
         
         // Update stats
-        this.eventCount++;
         this.stats.totalEvents++;
-        this.stats.eventTypes[event.event] = (this.stats.eventTypes[event.event] || 0) + 1;
+        this.stats.eventTypes[event.event || 'UNKNOWN'] = (this.stats.eventTypes[event.event || 'UNKNOWN'] || 0) + 1;
         
         if (event.event === "ItemCreated") this.stats.itemsCreated++;
         if (event.event === "ItemVerified") this.stats.itemsVerified++;
@@ -153,20 +171,18 @@ class CleanEventListener {
         // Clear line and show event
         process.stdout.write('\r' + ' '.repeat(100) + '\r');
         
-        console.log(`\nLIVE EVENT [${timestamp}]`);
-        console.log(`Type: ${event.event || 'UNKNOWN'}`);
-        console.log(`Block: ${event.blockNumber}`);
-        console.log(`Transaction: ${event.transactionHash.slice(0, 10)}...`);
+        console.log(`\n🔥 EVENT #${this.eventCount} [${timestamp}]`);
+        console.log(`📝 Type: ${event.event || 'UNKNOWN'}`);
         
         if (event.args && Object.keys(event.args).length > 0) {
-            console.log("Event Data:");
+            console.log("📊 Data:");
             Object.keys(event.args).forEach(key => {
                 const value = event.args[key].toString();
-                console.log(`      ${key}: ${value}`);
+                console.log(`   ${key}: ${value}`);
             });
         }
         
-        console.log("-".repeat(60));
+        console.log("─".repeat(50));
         
         // Show mini stats
         this.showMiniStats();
@@ -187,44 +203,45 @@ class CleanEventListener {
         // Clear line and show event
         process.stdout.write('\r' + ' '.repeat(100) + '\r');
         
-        console.log(`\n${eventType.toUpperCase()} EVENT [${timestamp}]`);
-        console.log(`Block: ${data.blockNumber}`);
-        console.log(`Transaction: ${data.transactionHash.slice(0, 10)}...`);
-        
         // Show event-specific details with role identification
         switch (eventType) {
             case "TransactionLogged":
                 const role = this.identifyRole(data.actor);
-                console.log(`Action: ${data.action}`);
-                console.log(`Actor: ${data.actor} (${role})`);
-                console.log(`Item: ${data.itemId}`);
+                console.log(`\n📝 TRANSACTION LOGGED [${timestamp}]`);
+                console.log(`🎯 Action: ${data.action}`);
+                console.log(`👤 Actor: ${data.actor} (${role})`);
+                console.log(`📦 Item: ${data.itemId}`);
                 break;
             case "ItemCreated":
                 const creatorRole = this.identifyRole(data.beneficiary);
-                console.log(`Item: ${data.itemId}`);
-                console.log(`Beneficiary: ${data.beneficiary} (${creatorRole})`);
-                console.log(`IPFS: ${data.ipfsHash}`);
+                console.log(`\n🆕 ITEM CREATED [${timestamp}]`);
+                console.log(`📦 Item ID: ${data.itemId}`);
+                console.log(`👤 Beneficiary: ${data.beneficiary} (${creatorRole})`);
+                console.log(`📁 IPFS: ${data.ipfsHash}`);
                 break;
             case "ItemVerified":
-                console.log(`Item: ${data.itemId}`);
-                console.log(`New Stage: ${data.newStage}`);
+                console.log(`\n✅ ITEM VERIFIED [${timestamp}]`);
+                console.log(`📦 Item ID: ${data.itemId}`);
+                console.log(`📊 New Stage: ${data.newStage}`);
                 break;
             case "DocumentUploaded":
                 const uploaderRole = this.identifyRole(data.uploader);
-                console.log(`Item: ${data.itemId}`);
-                console.log(`Stage: ${data.stage}`);
-                console.log(`IPFS: ${data.ipfsHash}`);
-                console.log(`Uploader: ${data.uploader} (${uploaderRole})`);
+                console.log(`\n📄 DOCUMENT UPLOADED [${timestamp}]`);
+                console.log(`📦 Item ID: ${data.itemId}`);
+                console.log(`📊 Stage: ${data.stage}`);
+                console.log(`👤 Uploader: ${data.uploader} (${uploaderRole})`);
+                console.log(`📁 IPFS: ${data.ipfsHash}`);
                 break;
             case "SubsidyClaimed":
                 const claimerRole = this.identifyRole(data.beneficiary);
-                console.log(`Item: ${data.itemId}`);
-                console.log(`Beneficiary: ${data.beneficiary} (${claimerRole})`);
-                console.log(`Claimed By: ${data.claimedBy}`);
+                console.log(`\n💰 SUBSIDY CLAIMED [${timestamp}]`);
+                console.log(`📦 Item ID: ${data.itemId}`);
+                console.log(`👤 Beneficiary: ${data.beneficiary} (${claimerRole})`);
+                console.log(`🎯 Claimed By: ${data.claimedBy}`);
                 break;
         }
         
-        console.log("-".repeat(60));
+        console.log("─".repeat(50));
         
         // Show mini stats
         this.showMiniStats();

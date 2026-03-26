@@ -15,18 +15,6 @@ const config = {
     }
 };
 
-// Contract ABI - Only include the events we need
-const CONTRACT_ABI = [
-    'event TransactionLogged(bytes32 indexed itemId, address indexed actor, string action)',
-    'event ItemCreated(uint256 indexed itemId, address indexed beneficiary, string ipfsHash)',
-    'event ItemVerified(uint256 indexed itemId, uint8 newStage)',
-    'event DocumentUploaded(uint256 indexed itemId, uint8 stage, string ipfsHash, address uploader)',
-    'event MerkleRootSet(uint256 indexed itemId, uint8 indexed stage, bytes32 merkleRoot)',
-    'event DocumentBatchVerified(uint256 indexed itemId, uint8 indexed stage, bytes32 merkleRoot)',
-    'event SubsidyClaimed(uint256 indexed itemId, address indexed beneficiary, address claimedBy)',
-    'event ItemCancelled(uint256 indexed itemId)'
-];
-
 class BlockchainEventListener {
     constructor() {
         this.provider = null;
@@ -38,8 +26,22 @@ class BlockchainEventListener {
 
     async initialize() {
         try {
-            // Initialize blockchain provider
+            // Initialize blockchain provider - use direct RPC provider
             this.provider = new ethers.JsonRpcProvider(config.blockchain.rpcUrl);
+            
+            // Contract ABI with events
+            const CONTRACT_ABI = [
+                'event TransactionLogged(bytes32 indexed itemId, address indexed actor, string action)',
+                'event ItemCreated(uint256 indexed itemId, address indexed beneficiary, string ipfsHash)',
+                'event ItemVerified(uint256 indexed itemId, uint8 newStage)',
+                'event DocumentUploaded(uint256 indexed itemId, uint8 stage, string ipfsHash, address uploader)',
+                'event MerkleRootSet(uint256 indexed itemId, uint8 indexed stage, bytes32 merkleRoot)',
+                'event DocumentBatchVerified(uint256 indexed itemId, uint8 indexed stage, bytes32 merkleRoot)',
+                'event SubsidyClaimed(uint256 indexed itemId, address indexed beneficiary, address claimedBy)',
+                'event ItemCancelled(uint256 indexed itemId)',
+                'function getItem(uint256 itemId) view returns (tuple(address beneficiary, uint8 stage, bool claimed, string currentIpfsHash, bytes32 itemId))',
+                'function itemIdToUint(bytes32 itemId) view returns (uint256)'
+            ];
             
             // Initialize contract
             this.contract = new ethers.Contract(

@@ -219,12 +219,64 @@ export async function POST(request: Request) {
         console.log('[submissions] Uploaded to IPFS (or mock):', file.name, '→', cid);
       }
 
-      // ---------------- BREAKING: BLOCKCHAIN INTEGRATION ----------------
-      // Shifted: Item is now created by the Admin during Verification/Release.
-      // This ensures itemID is only minted once verified.
+      // ---------------- BLOCKCHAIN INTEGRATION ----------------
+      // Create blockchain item immediately when processor submits
       let blockchainItemId: number | null = null;
       const passedBcId = formData.get('blockchain_itemId');
       if (passedBcId) blockchainItemId = Number(passedBcId);
+
+      // Create blockchain item if not exists and role is producer
+      console.log('[submissions] Checking blockchain creation conditions:');
+      console.log('  - blockchainItemId:', blockchainItemId);
+      console.log('  - role:', role);
+      console.log('  - condition:', !blockchainItemId && role === 'producer');
+      
+      if (!blockchainItemId && role === 'producer') {
+        try {
+          console.log('[submissions] Creating blockchain item for producer submission...');
+          
+          // Get beneficiary phone for blockchain
+          const beneficiaryPhone = phone || 'unknown';
+          
+          // Create blockchain item using ADMIN_KEY (processor role)
+          const contract = getContract(ADMIN_KEY);
+          const ipfsHash = uploadedCIDs[0] || 'QmDefault';
+          
+          // Use a default beneficiary address for now (can be updated later)
+          const beneficiaryAddress = '0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65'; // Default beneficiary
+          
+          const tx = await contract.createItem(beneficiaryAddress, ipfsHash);
+          const receipt = await tx.wait();
+          
+          // Extract itemId from the TransactionLogged event
+          const event = receipt.logs.find((log: any) => {
+            try {
+              const parsed = contract.interface.parseLog(log);
+              return parsed?.name === 'TransactionLogged' && parsed?.args?.action === 'CREATE_ITEM';
+            } catch {
+              return false;
+            }
+          });
+          
+          if (event) {
+            const parsed = contract.interface.parseLog(event);
+            if (parsed?.args) {
+              const itemIdBytes32 = parsed.args.itemId;
+              
+              // Convert bytes32 to uint256
+              const itemIdUint = await contract.itemIdToUint(itemIdBytes32);
+              blockchainItemId = Number(itemIdUint);
+              
+              console.log('[submissions] ✅ Blockchain item created:', blockchainItemId);
+              console.log('[submissions] 📦 Transaction hash:', tx.hash);
+            }
+          }
+          
+        } catch (bcError: any) {
+          console.error('[submissions] ❌ Blockchain item creation failed:', bcError.message);
+          // Continue without blockchain item
+        }
+      }
 
       // Sync with applications table
       let mySqlAppId: number | undefined = undefined;

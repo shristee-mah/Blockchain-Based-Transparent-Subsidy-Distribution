@@ -131,6 +131,13 @@ export async function POST(request: Request) {
         } else {
             // Standard verification for existing items
             try {
+                console.log(`[AdminVerify] Attempting standard verification:`);
+                console.log(`  - itemId: ${resolvedItemId}`);
+                console.log(`  - currentStage: ${currentStage}`);
+                console.log(`  - Stage.Created: ${Stage.Created}`);
+                console.log(`  - Stage.TransporterReady: ${Stage.TransporterReady}`);
+                console.log(`  - Stage.DistributorReady: ${Stage.DistributorReady}`);
+                
                 receipt = await sendTransactionWithNonce(contract, 'adminVerify', [resolvedItemId, currentStage]);
                 console.log(`[AdminVerify] Item ${resolvedItemId} verified from Stage ${currentStage}`);
                 
